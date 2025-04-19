@@ -29,6 +29,7 @@
       flex-wrap: wrap;
       justify-content: space-around;
       gap: 10px;
+      z-index: 10;
     }
 
     .btn {
@@ -47,8 +48,10 @@
   </style>
 </head>
 <body>
-  <canvas id="gameCanvas"></canvas>
+  <!-- ✅ Single canvas element only -->
+  <canvas id="gameCanvas" width="800" height="600" style="background:#222;"></canvas>
 
+  <!-- ✅ Game UI -->
   <div id="ui">
     <button class="btn" id="btnEat" tabindex="1">🍔 Eat</button>
     <button class="btn" id="btnSleep" tabindex="2">😴 Sleep</button>
@@ -57,7 +60,7 @@
     <button class="btn" id="btnConnect" tabindex="5">🔌 Connect Wallet</button>
   </div>
 
-  <script src="game.js" type="module"></script>
-  <script src="walletconnect.js" type="module"></script>
+  <!-- ✅ Load main game module (which imports walletconnect.js) -->
+  <script type="module" src="./game.js"></script>
 </body>
 </html>
