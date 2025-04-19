@@ -20,6 +20,7 @@ let pet = {
 };
 
 let target = null;
+let touchTarget = null;
 let statusDecayRate = 0.05;
 let frameCounter = 0;
 let gameOver = false;
@@ -40,8 +41,12 @@ function randomRoam() {
     };
   }
 
-  let dx = target.x - pet.x;
-  let dy = target.y - pet.y;
+  moveTowards(target);
+}
+
+function moveTowards(dest) {
+  let dx = dest.x - pet.x;
+  let dy = dest.y - pet.y;
   let distance = Math.sqrt(dx * dx + dy * dy);
   if (distance > 1) {
     pet.x += (dx / distance) * pet.speed;
@@ -135,7 +140,13 @@ function gameLoop() {
   if (gameOver) return;
   frameCounter++;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  randomRoam();
+
+  if (touchTarget) {
+    moveTowards(touchTarget);
+  } else {
+    randomRoam();
+  }
+
   drawPet();
   drawStatusBars();
   drawGlobalHealthBar();
@@ -150,6 +161,19 @@ function gameLoop() {
   checkGameOver();
   requestAnimationFrame(gameLoop);
 }
+
+canvas.addEventListener("touchstart", (e) => {
+  const touch = e.touches[0];
+  const rect = canvas.getBoundingClientRect();
+  touchTarget = {
+    x: touch.clientX - rect.left,
+    y: touch.clientY - rect.top
+  };
+});
+
+canvas.addEventListener("touchend", () => {
+  touchTarget = null;
+});
 
 window.addEventListener("resize", resizeCanvas);
 resizeCanvas();
