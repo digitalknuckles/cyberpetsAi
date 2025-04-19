@@ -4,15 +4,16 @@ const ctx = canvas.getContext('2d');
 let pet = {
   x: canvas.width / 2,
   y: canvas.height / 2,
-  size: 40,
+  size: 20, // Smaller pet
   color: 'lime',
   speed: 2,
   target: null,
-  state: 'roaming', // roaming, movingToTouch, movingToAction
+  state: 'roaming',
   roamTimer: 0
 };
 
 let touchPos = null;
+
 let stats = {
   hunger: 50,
   energy: 50,
@@ -20,7 +21,6 @@ let stats = {
   happiness: 50,
 };
 
-// Action target positions
 const actionTargets = {
   Eat: { x: 100, y: 100 },
   Sleep: { x: 700, y: 100 },
@@ -28,14 +28,14 @@ const actionTargets = {
   Play: { x: 700, y: 500 }
 };
 
-// UI Event Listeners
+// UI button listeners
 document.getElementById('btnEat').addEventListener('click', () => triggerAction('Eat'));
 document.getElementById('btnSleep').addEventListener('click', () => triggerAction('Sleep'));
 document.getElementById('btnWash').addEventListener('click', () => triggerAction('Wash'));
 document.getElementById('btnPlay').addEventListener('click', () => triggerAction('Play'));
 document.getElementById('btnConnect').addEventListener('click', () => alert('Wallet connect coming soon!'));
 
-// Touch Input
+// Touch controls
 canvas.addEventListener('touchstart', e => {
   e.preventDefault();
   const rect = canvas.getBoundingClientRect();
@@ -63,13 +63,12 @@ canvas.addEventListener('touchend', () => {
 });
 
 function triggerAction(action) {
-  if (pet.state === 'movingToTouch') return; // skip if player is touching
+  if (pet.state === 'movingToTouch') return; // touching overrides
   pet.target = actionTargets[action];
   pet.state = 'movingToAction';
   pet.currentAction = action;
 }
 
-// Roaming logic
 function updateRoaming() {
   pet.roamTimer--;
   if (pet.roamTimer <= 0) {
@@ -82,7 +81,6 @@ function updateRoaming() {
   movePetToward(pet.target);
 }
 
-// Movement helper
 function movePetToward(target) {
   const dx = target.x - pet.x;
   const dy = target.y - pet.y;
@@ -109,7 +107,17 @@ function applyStatBoost(action) {
   }
 }
 
-// Game loop
+function drawStats() {
+  ctx.font = '16px sans-serif';
+  ctx.fillStyle = 'white';
+  ctx.textAlign = 'left';
+  ctx.fillText(`Hunger: ${stats.hunger}`, 10, 20);
+  ctx.fillText(`Energy: ${stats.energy}`, 10, 40);
+  ctx.fillText(`Cleanliness: ${stats.cleanliness}`, 10, 60);
+  ctx.fillText(`Happiness: ${stats.happiness}`, 10, 80);
+}
+
+// Main game loop
 function update() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -126,6 +134,9 @@ function update() {
   ctx.beginPath();
   ctx.arc(pet.x, pet.y, pet.size, 0, Math.PI * 2);
   ctx.fill();
+
+  // Draw UI
+  drawStats();
 
   requestAnimationFrame(update);
 }
