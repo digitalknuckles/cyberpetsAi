@@ -41,7 +41,6 @@ function randomRoam() {
       y: Math.random() * (canvas.height - 100)
     };
   }
-
   moveTowards(target);
 }
 
@@ -106,8 +105,8 @@ function checkVictoryCondition() {
   if (hp >= 95 && !victory) {
     pet.speed *= 2;
     victory = true;
-    console.log("Victory achieved! Placeholder for mint logic");
-    // mintPrize(); ← UNCOMMENT to enable NFT mint
+    console.log("Victory achieved! Minting NFT...");
+    mintPrize();
   }
 }
 
@@ -138,7 +137,6 @@ function checkCollision(buttonId, statName, amount = 20) {
 }
 
 function triggerMiniGame(x, y) {
-  // Simulate interaction based on tap position
   if (x < canvas.width / 2 && y < canvas.height / 2) {
     pet.status.play = Math.min(100, pet.status.play + 10);
   } else if (x > canvas.width / 2 && y < canvas.height / 2) {
@@ -206,4 +204,3 @@ canvas.addEventListener("click", (e) => {
 window.addEventListener("resize", resizeCanvas);
 resizeCanvas();
 gameLoop();
-
