@@ -21,6 +21,7 @@ let pet = {
 
 let target = null;
 let touchTarget = null;
+let tapTarget = null;
 let statusDecayRate = 0.05;
 let frameCounter = 0;
 let gameOver = false;
@@ -136,6 +137,19 @@ function checkCollision(buttonId, statName, amount = 20) {
   }
 }
 
+function triggerMiniGame(x, y) {
+  // Simulate interaction based on tap position
+  if (x < canvas.width / 2 && y < canvas.height / 2) {
+    pet.status.play = Math.min(100, pet.status.play + 10);
+  } else if (x > canvas.width / 2 && y < canvas.height / 2) {
+    pet.status.eat = Math.min(100, pet.status.eat + 10);
+  } else if (x < canvas.width / 2 && y > canvas.height / 2) {
+    pet.status.sleep = Math.min(100, pet.status.sleep + 10);
+  } else {
+    pet.status.wash = Math.min(100, pet.status.wash + 10);
+  }
+}
+
 function gameLoop() {
   if (gameOver) return;
   frameCounter++;
@@ -143,6 +157,12 @@ function gameLoop() {
 
   if (touchTarget) {
     moveTowards(touchTarget);
+  } else if (tapTarget) {
+    moveTowards(tapTarget);
+    if (Math.abs(pet.x - tapTarget.x) < 5 && Math.abs(pet.y - tapTarget.y) < 5) {
+      triggerMiniGame(tapTarget.x, tapTarget.y);
+      tapTarget = null;
+    }
   } else {
     randomRoam();
   }
@@ -175,6 +195,15 @@ canvas.addEventListener("touchend", () => {
   touchTarget = null;
 });
 
+canvas.addEventListener("click", (e) => {
+  const rect = canvas.getBoundingClientRect();
+  tapTarget = {
+    x: e.clientX - rect.left,
+    y: e.clientY - rect.top
+  };
+});
+
 window.addEventListener("resize", resizeCanvas);
 resizeCanvas();
 gameLoop();
+
