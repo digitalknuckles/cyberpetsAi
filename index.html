@@ -48,10 +48,8 @@
   </style>
 </head>
 <body>
-  <!-- ✅ Single canvas element only -->
-  <canvas id="gameCanvas" width="800" height="600" style="background:#222;"></canvas>
+  <canvas id="gameCanvas"></canvas>
 
-  <!-- ✅ Game UI -->
   <div id="ui">
     <button class="btn" id="btnEat" tabindex="1">🍔 Eat</button>
     <button class="btn" id="btnSleep" tabindex="2">😴 Sleep</button>
@@ -60,7 +58,6 @@
     <button class="btn" id="btnConnect" tabindex="5">🔌 Connect Wallet</button>
   </div>
 
-  <!-- ✅ Load main game module (which imports walletconnect.js) -->
   <script type="module" src="./game.js"></script>
 </body>
 </html>
