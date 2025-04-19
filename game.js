@@ -1,125 +1,161 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
-let pet = {
-  x: 200,
-  y: 300,
-  width: 80,
-  height: 80,
-  color: "#FFAA00",
+const pet = {
+  x: canvas.width / 2,
+  y: canvas.height / 2,
+  size: 40,
   hunger: 100,
   happiness: 100,
-  energy: 100,
   cleanliness: 100,
+  energy: 100,
+  state: "roaming", // 'roaming' | 'movingToTouch' | 'movingToAction'
+  targetX: null,
+  targetY: null,
+  _roamTimer: 0,
 };
 
-function resizeCanvas() {
-  const dpr = window.devicePixelRatio || 1;
-  canvas.width = window.innerWidth * dpr;
-  canvas.height = window.innerHeight * dpr;
-  canvas.style.width = window.innerWidth + "px";
-  canvas.style.height = window.innerHeight + "px";
-  ctx.setTransform(1, 0, 0, 1, 0, 0);
-  ctx.scale(dpr, dpr);
-}
+let isTouching = false;
+let gameOver = false;
 
-window.addEventListener("resize", resizeCanvas);
-resizeCanvas();
-
+// Draw the pet
 function drawPet() {
-  ctx.fillStyle = pet.color;
-  ctx.fillRect(pet.x, pet.y, pet.width, pet.height);
+  ctx.beginPath();
+  ctx.arc(pet.x, pet.y, pet.size, 0, Math.PI * 2);
+  ctx.fillStyle = "#0f0";
+  ctx.fill();
+  ctx.closePath();
 }
 
-function drawStatusBars() {
-  const barWidth = 150;
-  const barHeight = 10;
-  const spacing = 15;
-  const labels = ["Hunger", "Happiness", "Energy", "Cleanliness"];
-  const values = [
-    pet.hunger,
-    pet.happiness,
-    pet.energy,
-    pet.cleanliness,
-  ];
+// Move pet toward target
+function movePetTowardTarget() {
+  const speed = 2;
+  if (pet.targetX === null || pet.targetY === null) return;
 
-  ctx.font = "14px sans-serif";
-  ctx.textBaseline = "top";
-  ctx.fillStyle = "#fff";
+  const dx = pet.targetX - pet.x;
+  const dy = pet.targetY - pet.y;
+  const dist = Math.sqrt(dx * dx + dy * dy);
 
-  for (let i = 0; i < labels.length; i++) {
-    const x = 10;
-    const y = 10 + i * (barHeight + spacing + 10);
+  if (dist < 1) {
+    if (pet.state === "movingToAction") {
+      performActionAtTarget();
+    }
+    pet.state = isTouching ? "movingToTouch" : "roaming";
+    return;
+  }
 
-    ctx.fillText(labels[i], x, y);
-    ctx.fillStyle = "#555";
-    ctx.fillRect(x, y + 18, barWidth, barHeight);
-    ctx.fillStyle = "#0f0";
-    ctx.fillRect(x, y + 18, (values[i] / 100) * barWidth, barHeight);
+  pet.x += (dx / dist) * speed;
+  pet.y += (dy / dist) * speed;
+}
+
+// Roaming behavior
+function roam() {
+  if (!pet._roamTimer || Date.now() - pet._roamTimer > 3000) {
+    pet.targetX = Math.random() * canvas.width;
+    pet.targetY = Math.random() * canvas.height;
+    pet._roamTimer = Date.now();
+  }
+  movePetTowardTarget();
+}
+
+// Main update
+function updatePetBehavior() {
+  if (pet.state === "movingToTouch" || pet.state === "movingToAction") {
+    movePetTowardTarget();
+  } else if (pet.state === "roaming") {
+    roam();
   }
 }
 
-function updateGame() {
-  // Basic decay
-  pet.hunger -= 0.02;
-  pet.happiness -= 0.01;
-  pet.energy -= 0.015;
-  pet.cleanliness -= 0.01;
-
-  // Clamp values
-  pet.hunger = Math.max(0, pet.hunger);
-  pet.happiness = Math.max(0, pet.happiness);
-  pet.energy = Math.max(0, pet.energy);
-  pet.cleanliness = Math.max(0, pet.cleanliness);
-}
-
-function drawGameOver() {
-  ctx.fillStyle = "#000000cc";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  ctx.font = "32px sans-serif";
-  ctx.fillStyle = "#fff";
-  ctx.fillText("Game Over", canvas.width / 2 / (window.devicePixelRatio || 1) - 80, canvas.height / 2 / (window.devicePixelRatio || 1));
-}
-
-function gameLoop() {
+// Draw loop
+function update() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  updateGame();
-  drawPet();
-  drawStatusBars();
+  if (!gameOver) {
+    updatePetBehavior();
+    drawPet();
+  }
 
-  if (
-    pet.hunger <= 0 ||
-    pet.happiness <= 0 ||
-    pet.energy <= 0 ||
-    pet.cleanliness <= 0
-  ) {
-    drawGameOver();
-  } else {
-    requestAnimationFrame(gameLoop);
+  requestAnimationFrame(update);
+}
+update();
+
+// Touch controls
+canvas.addEventListener("touchstart", (e) => {
+  const touch = e.touches[0];
+  const rect = canvas.getBoundingClientRect();
+  const x = touch.clientX - rect.left;
+  const y = touch.clientY - rect.top;
+
+  pet.targetX = x;
+  pet.targetY = y;
+  pet.state = "movingToTouch";
+  isTouching = true;
+});
+
+canvas.addEventListener("touchmove", (e) => {
+  const touch = e.touches[0];
+  const rect = canvas.getBoundingClientRect();
+  const x = touch.clientX - rect.left;
+  const y = touch.clientY - rect.top;
+
+  pet.targetX = x;
+  pet.targetY = y;
+});
+
+canvas.addEventListener("touchend", () => {
+  isTouching = false;
+  pet.state = "roaming";
+});
+
+// Action buttons
+function moveToActionObject(action) {
+  if (isTouching) return; // skip if player is touching
+
+  pet.state = "movingToAction";
+  pet._roamTimer = 0;
+
+  switch (action) {
+    case "eat":
+      pet.targetX = canvas.width * 0.2;
+      pet.targetY = canvas.height * 0.8;
+      break;
+    case "sleep":
+      pet.targetX = canvas.width * 0.8;
+      pet.targetY = canvas.height * 0.2;
+      break;
+    case "wash":
+      pet.targetX = canvas.width * 0.5;
+      pet.targetY = canvas.height * 0.9;
+      break;
+    case "play":
+      pet.targetX = canvas.width * 0.5;
+      pet.targetY = canvas.height * 0.1;
+      break;
   }
 }
 
-// Button event handlers
-document.getElementById("btnEat").addEventListener("click", () => {
-  pet.hunger = Math.min(pet.hunger + 20, 100);
-});
+// Action result (placeholder)
+function performActionAtTarget() {
+  if (pet.state !== "movingToAction") return;
+  console.log("Pet reached action target.");
 
-document.getElementById("btnSleep").addEventListener("click", () => {
-  pet.energy = Math.min(pet.energy + 20, 100);
-});
+  // Simulate stat increases
+  pet.hunger = Math.min(pet.hunger + 10, 100);
+  pet.energy = Math.min(pet.energy + 10, 100);
+  pet.cleanliness = Math.min(pet.cleanliness + 10, 100);
+  pet.happiness = Math.min(pet.happiness + 10, 100);
 
-document.getElementById("btnWash").addEventListener("click", () => {
-  pet.cleanliness = Math.min(pet.cleanliness + 20, 100);
-});
+  pet.targetX = null;
+  pet.targetY = null;
+  pet.state = "roaming";
+}
 
-document.getElementById("btnPlay").addEventListener("click", () => {
-  pet.happiness = Math.min(pet.happiness + 20, 100);
-});
-
+// Button listeners
+document.getElementById("btnEat").addEventListener("click", () => moveToActionObject("eat"));
+document.getElementById("btnSleep").addEventListener("click", () => moveToActionObject("sleep"));
+document.getElementById("btnWash").addEventListener("click", () => moveToActionObject("wash"));
+document.getElementById("btnPlay").addEventListener("click", () => moveToActionObject("play"));
 document.getElementById("btnConnect").addEventListener("click", () => {
-  alert("Wallet connect feature coming soon!");
+  console.log("Connect wallet feature coming soon...");
 });
-
-gameLoop();
