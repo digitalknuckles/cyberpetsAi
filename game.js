@@ -147,8 +147,10 @@ function movePetTo(buttonId) {
   pet.y = targetY;
 }
 
-window.addEventListener("resize", resizeCanvas);
-console.log("Canvas:", canvas.width, canvas.height);
-console.log("Pet Position:", pet.x, pet.y);
-resizeCanvas();
-gameLoop();
+
+window.addEventListener("load", () => {
+  resizeCanvas();
+  console.log("Canvas:", canvas.width, canvas.height);
+  console.log("Pet Position:", pet.x, pet.y);
+  gameLoop();
+});
