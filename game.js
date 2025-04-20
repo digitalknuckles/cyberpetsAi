@@ -21,7 +21,7 @@ let pet = {
 };
 
 // Set the image source and wait for it to load
-pet.sprite.src = "assets/RobotTeddy_Ai.png";
+pet.sprite.src = "RobotTeddy_Ai.png";
 pet.sprite.onload = () => {
   console.log('Pet sprite loaded successfully');
 };
