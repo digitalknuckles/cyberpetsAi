@@ -31,6 +31,10 @@ function resizeCanvas() {
 function drawPet() {
   if (pet.sprite.complete) {
     ctx.drawImage(pet.sprite, pet.x, pet.y, pet.width, pet.height);
+  } else {
+    // draw a temporary red box for visibility
+    ctx.fillStyle = "red";
+    ctx.fillRect(pet.x, pet.y, pet.width, pet.height);
   }
 }
 
