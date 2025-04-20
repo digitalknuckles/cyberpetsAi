@@ -1,5 +1,6 @@
 // game.js
-import { connectWallet, mintPrize } from './walletconnect.js';
+
+import { mintPrize } from './walletconnect.js';
 let canvas, ctx;
 
 let pet = {
