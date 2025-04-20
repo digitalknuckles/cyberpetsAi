@@ -20,6 +20,10 @@ let pet = {
   }
 };
 
+function preload() {
+  this.load.image('robotTeddy', 'https://digitalknuckles.github.io/assets/images/RobotTeddyAi.png');
+}
+
 let globalHealth = 100;
 let globalTraining = 0;
 let trainingUnlocked = false;
