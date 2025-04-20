@@ -1,144 +1,206 @@
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
+// game.js
+import { mintPrize } from './walletconnect.js';
+
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
 
 let pet = {
-  x: canvas.width / 2,
-  y: canvas.height / 2,
-  size: 20, // Smaller pet
-  color: 'lime',
+  x: 100,
+  y: 100,
+  width: 50,
+  height: 50,
+  color: "green",
   speed: 2,
-  target: null,
-  state: 'roaming',
-  roamTimer: 0
+  status: {
+    eat: 100,
+    sleep: 100,
+    wash: 100,
+    play: 100
+  }
 };
 
-let touchPos = null;
+let target = null;
+let touchTarget = null;
+let tapTarget = null;
+let statusDecayRate = 0.05;
+let frameCounter = 0;
+let gameOver = false;
+let victory = false;
 
-let stats = {
-  hunger: 50,
-  energy: 50,
-  cleanliness: 50,
-  happiness: 50,
-};
+const statusElements = ['eat', 'sleep', 'wash', 'play'];
 
-const actionTargets = {
-  Eat: { x: 100, y: 100 },
-  Sleep: { x: 700, y: 100 },
-  Wash: { x: 100, y: 500 },
-  Play: { x: 700, y: 500 }
-};
-
-// UI button listeners
-document.getElementById('btnEat').addEventListener('click', () => triggerAction('Eat'));
-document.getElementById('btnSleep').addEventListener('click', () => triggerAction('Sleep'));
-document.getElementById('btnWash').addEventListener('click', () => triggerAction('Wash'));
-document.getElementById('btnPlay').addEventListener('click', () => triggerAction('Play'));
-document.getElementById('btnConnect').addEventListener('click', () => alert('Wallet connect coming soon!'));
-
-// Touch controls
-canvas.addEventListener('touchstart', e => {
-  e.preventDefault();
-  const rect = canvas.getBoundingClientRect();
-  const touch = e.touches[0];
-  touchPos = {
-    x: touch.clientX - rect.left,
-    y: touch.clientY - rect.top
-  };
-  pet.state = 'movingToTouch';
-});
-
-canvas.addEventListener('touchmove', e => {
-  e.preventDefault();
-  const rect = canvas.getBoundingClientRect();
-  const touch = e.touches[0];
-  touchPos = {
-    x: touch.clientX - rect.left,
-    y: touch.clientY - rect.top
-  };
-});
-
-canvas.addEventListener('touchend', () => {
-  touchPos = null;
-  pet.state = 'roaming';
-});
-
-function triggerAction(action) {
-  if (pet.state === 'movingToTouch') return; // touching overrides
-  pet.target = actionTargets[action];
-  pet.state = 'movingToAction';
-  pet.currentAction = action;
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
 }
 
-function updateRoaming() {
-  pet.roamTimer--;
-  if (pet.roamTimer <= 0) {
-    pet.target = {
-      x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height
+function randomRoam() {
+  if (!target || Math.random() < 0.01) {
+    target = {
+      x: Math.random() * (canvas.width - 100),
+      y: Math.random() * (canvas.height - 100)
     };
-    pet.roamTimer = 200 + Math.random() * 200;
   }
-  movePetToward(pet.target);
+  moveTowards(target);
 }
 
-function movePetToward(target) {
-  const dx = target.x - pet.x;
-  const dy = target.y - pet.y;
-  const dist = Math.sqrt(dx * dx + dy * dy);
-  if (dist > 1) {
-    pet.x += (dx / dist) * pet.speed;
-    pet.y += (dy / dist) * pet.speed;
+function moveTowards(dest) {
+  let dx = dest.x - pet.x;
+  let dy = dest.y - pet.y;
+  let distance = Math.sqrt(dx * dx + dy * dy);
+  if (distance > 1) {
+    pet.x += (dx / distance) * pet.speed;
+    pet.y += (dy / distance) * pet.speed;
+  }
+}
+
+function drawPet() {
+  ctx.fillStyle = pet.color;
+  ctx.fillRect(pet.x, pet.y, pet.width, pet.height);
+}
+
+function drawStatusBars() {
+  let y = 10;
+  statusElements.forEach(stat => {
+    const val = pet.status[stat];
+    ctx.fillStyle = val <= 25 ? (frameCounter % 30 < 15 ? "red" : "darkred") :
+                     val >= 100 ? (frameCounter % 30 < 15 ? "lime" : "green") :
+                     val >= 50 ? "green" : "red";
+    ctx.fillRect(10, y, val * 2, 20);
+    ctx.strokeStyle = "#fff";
+    ctx.strokeRect(10, y, 200, 20);
+    ctx.fillStyle = "#fff";
+    ctx.fillText(`${stat.toUpperCase()}: ${Math.floor(val)}`, 220, y + 15);
+    y += 30;
+  });
+}
+
+function drawGlobalHealthBar() {
+  const hp = getGlobalHP();
+  ctx.fillStyle = hp <= 10 ? (frameCounter % 30 < 15 ? "red" : "darkred") :
+                   hp >= 95 ? (frameCounter % 30 < 15 ? "lime" : "green") :
+                   hp >= 50 ? "green" : "orange";
+  ctx.fillRect(10, canvas.height - 40, hp * 2, 20);
+  ctx.strokeStyle = "#fff";
+  ctx.strokeRect(10, canvas.height - 40, 200, 20);
+  ctx.fillStyle = "#fff";
+  ctx.fillText(`GLOBAL HP: ${Math.floor(hp)}`, 220, canvas.height - 25);
+  if (hp <= 10) ctx.fillText("Condition Critical", pet.x + 60, pet.y);
+}
+
+function getGlobalHP() {
+  let sum = 0;
+  statusElements.forEach(stat => sum += pet.status[stat]);
+  return sum / 4;
+}
+
+function updateStatusDecay() {
+  statusElements.forEach(stat => {
+    pet.status[stat] = Math.max(0, pet.status[stat] - statusDecayRate);
+  });
+}
+
+function checkVictoryCondition() {
+  const hp = getGlobalHP();
+  if (hp >= 95 && !victory) {
+    pet.speed *= 2;
+    victory = true;
+    console.log("Victory achieved! Minting NFT...");
+    mintPrize();
+  }
+}
+
+function checkGameOver() {
+  if (statusElements.every(stat => pet.status[stat] <= 1)) {
+    gameOver = true;
+    ctx.fillStyle = "white";
+    ctx.font = "32px sans-serif";
+    ctx.fillText("Game Over: Pet has Disappeared", canvas.width / 2 - 150, canvas.height / 2);
+  }
+}
+
+function checkCollision(buttonId, statName, amount = 20) {
+  const btn = document.getElementById(buttonId);
+  const rect = btn.getBoundingClientRect();
+  const canvasRect = canvas.getBoundingClientRect();
+  const btnX = rect.left - canvasRect.left;
+  const btnY = rect.top - canvasRect.top;
+
+  if (
+    pet.x < btnX + rect.width &&
+    pet.x + pet.width > btnX &&
+    pet.y < btnY + rect.height &&
+    pet.y + pet.height > btnY
+  ) {
+    pet.status[statName] = Math.min(100, pet.status[statName] + amount);
+  }
+}
+
+function triggerMiniGame(x, y) {
+  if (x < canvas.width / 2 && y < canvas.height / 2) {
+    pet.status.play = Math.min(100, pet.status.play + 10);
+  } else if (x > canvas.width / 2 && y < canvas.height / 2) {
+    pet.status.eat = Math.min(100, pet.status.eat + 10);
+  } else if (x < canvas.width / 2 && y > canvas.height / 2) {
+    pet.status.sleep = Math.min(100, pet.status.sleep + 10);
   } else {
-    if (pet.state === 'movingToAction') {
-      applyStatBoost(pet.currentAction);
-    }
-    pet.state = 'roaming';
-    pet.roamTimer = 0;
-    pet.target = null;
+    pet.status.wash = Math.min(100, pet.status.wash + 10);
   }
 }
 
-function applyStatBoost(action) {
-  switch (action) {
-    case 'Eat': stats.hunger = Math.min(100, stats.hunger + 10); break;
-    case 'Sleep': stats.energy = Math.min(100, stats.energy + 10); break;
-    case 'Wash': stats.cleanliness = Math.min(100, stats.cleanliness + 10); break;
-    case 'Play': stats.happiness = Math.min(100, stats.happiness + 10); break;
-  }
-}
-
-function drawStats() {
-  ctx.font = '16px sans-serif';
-  ctx.fillStyle = 'white';
-  ctx.textAlign = 'left';
-  ctx.fillText(`Hunger: ${stats.hunger}`, 10, 20);
-  ctx.fillText(`Energy: ${stats.energy}`, 10, 40);
-  ctx.fillText(`Cleanliness: ${stats.cleanliness}`, 10, 60);
-  ctx.fillText(`Happiness: ${stats.happiness}`, 10, 80);
-}
-
-// Main game loop
-function update() {
+function gameLoop() {
+  if (gameOver) return;
+  frameCounter++;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  if (pet.state === 'movingToTouch' && touchPos) {
-    movePetToward(touchPos);
-  } else if (pet.state === 'movingToAction') {
-    movePetToward(pet.target);
+  if (touchTarget) {
+    moveTowards(touchTarget);
+  } else if (tapTarget) {
+    moveTowards(tapTarget);
+    if (Math.abs(pet.x - tapTarget.x) < 5 && Math.abs(pet.y - tapTarget.y) < 5) {
+      triggerMiniGame(tapTarget.x, tapTarget.y);
+      tapTarget = null;
+    }
   } else {
-    updateRoaming();
+    randomRoam();
   }
 
-  // Draw pet
-  ctx.fillStyle = pet.color;
-  ctx.beginPath();
-  ctx.arc(pet.x, pet.y, pet.size, 0, Math.PI * 2);
-  ctx.fill();
+  drawPet();
+  drawStatusBars();
+  drawGlobalHealthBar();
+  updateStatusDecay();
 
-  // Draw UI
-  drawStats();
+  checkCollision("btnEat", "eat");
+  checkCollision("btnSleep", "sleep");
+  checkCollision("btnWash", "wash");
+  checkCollision("btnPlay", "play");
 
-  requestAnimationFrame(update);
+  checkVictoryCondition();
+  checkGameOver();
+  requestAnimationFrame(gameLoop);
 }
 
-update();
+canvas.addEventListener("touchstart", (e) => {
+  const touch = e.touches[0];
+  const rect = canvas.getBoundingClientRect();
+  touchTarget = {
+    x: touch.clientX - rect.left,
+    y: touch.clientY - rect.top
+  };
+});
+
+canvas.addEventListener("touchend", () => {
+  touchTarget = null;
+});
+
+canvas.addEventListener("click", (e) => {
+  const rect = canvas.getBoundingClientRect();
+  tapTarget = {
+    x: e.clientX - rect.left,
+    y: e.clientY - rect.top
+  };
+});
+
+window.addEventListener("resize", resizeCanvas);
+resizeCanvas();
+gameLoop();
