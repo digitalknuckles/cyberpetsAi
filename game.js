@@ -24,7 +24,7 @@ let globalHealth = 100;
 let globalTraining = 0;
 let trainingUnlocked = false;
 
-pet.sprite.src = "/RobotTeddy_Ai.png";
+pet.sprite.src = "/RobotTeddyAi.png";
 pet.sprite.onload = () => console.log('Pet sprite loaded successfully');
 pet.sprite.onerror = () => console.error('Failed to load pet sprite image');
 
