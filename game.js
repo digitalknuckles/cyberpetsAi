@@ -1,8 +1,7 @@
 // game.js
 import { mintPrize } from './walletconnect.js';
 
-const canvas = document.getElementById("gameCanvas");
-const ctx = canvas.getContext("2d");
+let canvas, ctx;
 
 let pet = {
   x: 100,
@@ -23,6 +22,11 @@ let pet = {
 
 pet.sprite.src = "assets/RobotTeddy_Ai.png";
 
+// Optional: Debug when image loads
+pet.sprite.onload = () => {
+  console.log("Pet image loaded!");
+};
+
 function resizeCanvas() {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
@@ -32,7 +36,7 @@ function drawPet() {
   if (pet.sprite.complete) {
     ctx.drawImage(pet.sprite, pet.x, pet.y, pet.width, pet.height);
   } else {
-    // draw a temporary red box for visibility
+    // fallback: red box
     ctx.fillStyle = "red";
     ctx.fillRect(pet.x, pet.y, pet.width, pet.height);
   }
@@ -131,11 +135,6 @@ function gameLoop() {
   requestAnimationFrame(gameLoop);
 }
 
-document.getElementById("btnEat").addEventListener("click", () => movePetTo("btnEat"));
-document.getElementById("btnSleep").addEventListener("click", () => movePetTo("btnSleep"));
-document.getElementById("btnWash").addEventListener("click", () => movePetTo("btnWash"));
-document.getElementById("btnPlay").addEventListener("click", () => movePetTo("btnPlay"));
-
 function movePetTo(buttonId) {
   const btn = document.getElementById(buttonId);
   const rect = btn.getBoundingClientRect();
@@ -147,10 +146,18 @@ function movePetTo(buttonId) {
   pet.y = targetY;
 }
 
-
 window.addEventListener("load", () => {
+  canvas = document.getElementById("gameCanvas");
+  ctx = canvas.getContext("2d");
+
   resizeCanvas();
   console.log("Canvas:", canvas.width, canvas.height);
   console.log("Pet Position:", pet.x, pet.y);
   gameLoop();
+
+  // Bind buttons once canvas is ready
+  document.getElementById("btnEat").addEventListener("click", () => movePetTo("btnEat"));
+  document.getElementById("btnSleep").addEventListener("click", () => movePetTo("btnSleep"));
+  document.getElementById("btnWash").addEventListener("click", () => movePetTo("btnWash"));
+  document.getElementById("btnPlay").addEventListener("click", () => movePetTo("btnPlay"));
 });
