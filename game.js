@@ -1,3 +1,4 @@
+// game.js
 import { mintPrize } from './walletconnect.js';
 
 const canvas = document.getElementById("gameCanvas");
@@ -32,18 +33,6 @@ function resizeCanvas() {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
 }
-window.addEventListener("resize", resizeCanvas);
-resizeCanvas();
-
-function moveTowards(dest) {
-  const dx = dest.x - pet.x;
-  const dy = dest.y - pet.y;
-  const distance = Math.sqrt(dx * dx + dy * dy);
-  if (distance > 1) {
-    pet.x += (dx / distance) * pet.speed;
-    pet.y += (dy / distance) * pet.speed;
-  }
-}
 
 function randomRoam() {
   if (!target || Math.random() < 0.01) {
@@ -55,6 +44,16 @@ function randomRoam() {
   moveTowards(target);
 }
 
+function moveTowards(dest) {
+  let dx = dest.x - pet.x;
+  let dy = dest.y - pet.y;
+  let distance = Math.sqrt(dx * dx + dy * dy);
+  if (distance > 1) {
+    pet.x += (dx / distance) * pet.speed;
+    pet.y += (dy / distance) * pet.speed;
+  }
+}
+
 function drawPet() {
   ctx.fillStyle = pet.color;
   ctx.fillRect(pet.x, pet.y, pet.width, pet.height);
@@ -62,17 +61,14 @@ function drawPet() {
 
 function drawStatusBars() {
   let y = 10;
-  ctx.font = "16px sans-serif";
   statusElements.forEach(stat => {
     const val = pet.status[stat];
     ctx.fillStyle = val <= 25 ? (frameCounter % 30 < 15 ? "red" : "darkred") :
                      val >= 100 ? (frameCounter % 30 < 15 ? "lime" : "green") :
-                     val >= 50 ? "green" : "orange";
+                     val >= 50 ? "green" : "red";
     ctx.fillRect(10, y, val * 2, 20);
-
     ctx.strokeStyle = "#fff";
     ctx.strokeRect(10, y, 200, 20);
-
     ctx.fillStyle = "#fff";
     ctx.fillText(`${stat.toUpperCase()}: ${Math.floor(val)}`, 220, y + 15);
     y += 30;
@@ -89,9 +85,7 @@ function drawGlobalHealthBar() {
   ctx.strokeRect(10, canvas.height - 40, 200, 20);
   ctx.fillStyle = "#fff";
   ctx.fillText(`GLOBAL HP: ${Math.floor(hp)}`, 220, canvas.height - 25);
-  if (hp <= 10) {
-    ctx.fillText("Condition Critical", pet.x + 60, pet.y);
-  }
+  if (hp <= 10) ctx.fillText("Condition Critical", pet.x + 60, pet.y);
 }
 
 function getGlobalHP() {
@@ -121,7 +115,7 @@ function checkGameOver() {
     gameOver = true;
     ctx.fillStyle = "white";
     ctx.font = "32px sans-serif";
-    ctx.fillText("Game Over: Pet has Disappeared", canvas.width / 2 - 200, canvas.height / 2);
+    ctx.fillText("Game Over: Pet has Disappeared", canvas.width / 2 - 150, canvas.height / 2);
   }
 }
 
@@ -156,7 +150,6 @@ function triggerMiniGame(x, y) {
 
 function gameLoop() {
   if (gameOver) return;
-
   frameCounter++;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -184,11 +177,9 @@ function gameLoop() {
 
   checkVictoryCondition();
   checkGameOver();
-
   requestAnimationFrame(gameLoop);
 }
 
-// Touch & Click Listeners
 canvas.addEventListener("touchstart", (e) => {
   const touch = e.touches[0];
   const rect = canvas.getBoundingClientRect();
@@ -197,7 +188,10 @@ canvas.addEventListener("touchstart", (e) => {
     y: touch.clientY - rect.top
   };
 });
-canvas.addEventListener("touchend", () => touchTarget = null);
+
+canvas.addEventListener("touchend", () => {
+  touchTarget = null;
+});
 
 canvas.addEventListener("click", (e) => {
   const rect = canvas.getBoundingClientRect();
@@ -207,4 +201,6 @@ canvas.addEventListener("click", (e) => {
   };
 });
 
+window.addEventListener("resize", resizeCanvas);
+resizeCanvas();
 gameLoop();
