@@ -2,62 +2,23 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <title>Digital Pet Game</title>
-  <style>
-    body, html {
-      margin: 0;
-      padding: 0;
-      overflow: hidden;
-      background: #222;
-      font-family: sans-serif;
-    }
-
-    canvas {
-      display: block;
-      width: 100vw;
-      height: 100vh;
-      touch-action: none;
-    }
-
-    #ui {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      right: 10px;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-around;
-      gap: 10px;
-      z-index: 10;
-    }
-
-    .btn {
-      background-color: #444;
-      color: #fff;
-      padding: 10px 14px;
-      border: none;
-      border-radius: 12px;
-      font-size: 14px;
-      cursor: pointer;
-    }
-
-    .btn:focus {
-      outline: 2px solid #00f;
-    }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pet Care Game</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <canvas id="gameCanvas"></canvas>
+  <div id="gameContainer">
+    <canvas id="gameCanvas"></canvas>
 
-  <div id="ui">
-    <button class="btn" id="btnEat" tabindex="1">🍔 Eat</button>
-    <button class="btn" id="btnSleep" tabindex="2">😴 Sleep</button>
-    <button class="btn" id="btnWash" tabindex="3">🛁 Wash</button>
-    <button class="btn" id="btnPlay" tabindex="4">🎮 Play</button>
-    <button class="btn" id="btnConnect" tabindex="5">🔌 Connect Wallet</button>
+    <!-- Control Buttons -->
+    <div id="controls">
+      <button id="btnEat">Feed</button>
+      <button id="btnSleep">Sleep</button>
+      <button id="btnWash">Wash</button>
+      <button id="btnPlay">Play</button>
+    </div>
   </div>
 
-  <script type="module" src="./game.js"></script>
+  <script type="module" src="game.js"></script>
 </body>
 </html>
