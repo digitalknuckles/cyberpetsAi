@@ -1,5 +1,7 @@
 // Import ethers (only once at the top)
-import { ethers } from './ethers-5.7.esm.min.js';  // This is where ethers should be imported
+<script type="module">
+  import { ethers } from 'https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.esm.min.js';
+</script>
 
 // Your contract address and ABI
 const CONTRACT_ADDRESS = '0x7eFC729a41FC7073dE028712b0FB3950F735f9ca';
