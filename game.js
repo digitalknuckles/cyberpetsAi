@@ -1,109 +1,174 @@
-// game.js
-import { connectWallet, mintPrize } from './walletconnect.js';
+import { mintPrize } from './walletconnect.js';
 
-let game;
-let petStats = { eat: 100, sleep: 100, wash: 100, play: 100 };
-let statCooldowns = { eat: 0, sleep: 0, wash: 0, play: 0 };
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+
+let pet = {
+  x: 100,
+  y: 100,
+  vx: 1.5,
+  vy: 1.5,
+  width: 80,
+  height: 80,
+  speedMultiplier: 1,
+  sprite: new Image(),
+  stats: {
+    eat: 100,
+    sleep: 100,
+    wash: 100,
+    play: 100
+  }
+};
+
 let globalHealth = 100;
 let globalTraining = 0;
 let trainingUnlocked = false;
-let victoryAchieved = false;
 
-window.onload = function () {
-  const config = {
-    type: Phaser.AUTO,
-    width: 800,
-    height: 600,
-    scene: {
-      preload: preload,
-      create: create,
-      update: update
-    }
-  };
+pet.sprite.src = "/RobotTeddy_Ai.png";
+pet.sprite.onload = () => console.log('Pet sprite loaded successfully');
+pet.sprite.onerror = () => console.error('Failed to load pet sprite image');
 
-  game = new Phaser.Game(config);
-};
-
-function preload() {
-  this.load.image('background', 'https://gateway.pinata.cloud/ipfs/QmVc4cfE9...');
-  this.load.image('claw', 'https://gateway.pinata.cloud/ipfs/QmbhSzvn...');
-  this.load.image('victory', 'https://gateway.pinata.cloud/ipfs/QmfZkTD...');
-  // Load pet stat buttons/icons here
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
 }
 
-function create() {
-  this.add.image(400, 300, 'background');
-
-  // Setup stat buttons with input
-  this.input.keyboard.on('keydown-E', () => modifyStat('eat', 10));
-  this.input.keyboard.on('keydown-S', () => modifyStat('sleep', 10));
-  this.input.keyboard.on('keydown-W', () => modifyStat('wash', 10));
-  this.input.keyboard.on('keydown-P', () => modifyStat('play', 10));
-
-  this.victoryText = this.add.text(200, 250, '', { fontSize: '32px', fill: '#fff' });
-  this.mintButton = this.add.text(250, 320, '', { fontSize: '28px', fill: '#0f0' })
-    .setInteractive()
-    .on('pointerdown', () => {
-      connectWallet().then(mintPrize);
-    });
-  this.mintButton.setVisible(false);
-
-  // Optional: add visual bars for stats/global bars later
+function drawPet() {
+  if (pet.sprite.complete && pet.sprite.naturalWidth > 0) {
+    ctx.drawImage(pet.sprite, pet.x, pet.y, pet.width, pet.height);
+  } else {
+    ctx.fillStyle = "red";
+    ctx.fillRect(pet.x, pet.y, pet.width, pet.height);
+  }
 }
 
-function update(time, delta) {
-  // Cooldown reduction
-  Object.keys(statCooldowns).forEach(stat => {
-    if (statCooldowns[stat] > 0) statCooldowns[stat] -= delta / 1000;
-  });
-
-  // Stat decay
-  Object.keys(petStats).forEach(stat => {
-    petStats[stat] -= 0.01;
-    if (petStats[stat] <= 0) {
+function updateStats() {
+  for (let key in pet.stats) {
+    pet.stats[key] = Math.max(0, pet.stats[key] - 0.02);
+    if (pet.stats[key] === 0) {
       if (!trainingUnlocked) {
-        globalHealth -= 0.1;
+        globalHealth = Math.max(0, globalHealth - 0.05);
       } else {
-        globalTraining -= 0.1;
+        globalTraining = Math.max(0, globalTraining - 0.05);
       }
     }
-    petStats[stat] = Phaser.Math.Clamp(petStats[stat], 0, 100);
+  }
+}
+
+function drawHUD() {
+  Object.keys(pet.stats).forEach((key) => {
+    const bar = document.getElementById(`${key}Bar`);
+    if (bar) {
+      bar.style.width = `${pet.stats[key]}%`;
+      if (pet.stats[key] >= 100) bar.className = "status-bar blink-green";
+      else if (pet.stats[key] <= 25) bar.className = "status-bar blink-red";
+      else if (pet.stats[key] < 50) bar.className = "status-bar red";
+      else bar.className = "status-bar green";
+    }
   });
 
-  // Global health fill logic
-  if (!trainingUnlocked) {
-    if (globalHealth < 100) {
-      globalHealth += 0.05 * statBoostAmount();
-    } else {
-      trainingUnlocked = true;
+  const hpBar = document.getElementById("globalHealthBar");
+  if (hpBar) hpBar.style.width = `${globalHealth}%`;
+
+  const trainingBar = document.getElementById("globalTrainingBar");
+  if (trainingBar) trainingBar.style.width = `${globalTraining}%`;
+
+  const critical = document.getElementById("criticalWarning");
+  if (critical) critical.style.display = globalHealth < 10 ? "block" : "none";
+}
+
+function checkGameConditions() {
+  const values = Object.values(pet.stats);
+  const allZero = values.every((v) => v <= 1);
+
+  if (allZero) {
+    alert("Game Over: Pet has Disappeared");
+    window.location.reload();
+  }
+
+  if (globalHealth >= 100 && !trainingUnlocked) {
+    trainingUnlocked = true;
+    console.log("Training Unlocked!");
+  }
+
+  if (globalHealth >= 100 && trainingUnlocked && globalTraining >= 100 && !window.victoryAchieved) {
+    window.victoryAchieved = true;
+    pet.speedMultiplier = 2;
+    setTimeout(() => {
+      alert("🎉 Super Star Pet Vibes! 🐾\nMint your prize!");
+      mintPrize();
+    }, 300);
+  }
+}
+
+function movePet() {
+  pet.x += pet.vx * pet.speedMultiplier;
+  pet.y += pet.vy * pet.speedMultiplier;
+
+  if (pet.x <= 0 || pet.x + pet.width >= canvas.width) pet.vx *= -1;
+  if (pet.y <= 0 || pet.y + pet.height >= canvas.height) pet.vy *= -1;
+}
+
+function isCollidingWithButton(btnId) {
+  const btn = document.getElementById(btnId);
+  const rect = btn.getBoundingClientRect();
+  const canvasRect = canvas.getBoundingClientRect();
+  const bx = rect.left - canvasRect.left;
+  const by = rect.top - canvasRect.top;
+
+  return (
+    pet.x < bx + rect.width &&
+    pet.x + pet.width > bx &&
+    pet.y < by + rect.height &&
+    pet.y + pet.height > by
+  );
+}
+
+function gameLoop() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  movePet();
+  drawPet();
+  updateStats();
+  drawHUD();
+  checkGameConditions();
+
+  const buttons = ["btnEat", "btnSleep", "btnWash", "btnPlay"];
+  buttons.forEach(btn => {
+    if (isCollidingWithButton(btn)) {
+      const stat = btn.replace("btn", "").toLowerCase();
+      if (pet.stats[stat] < 100) {
+        pet.stats[stat] = Math.min(100, pet.stats[stat] + 1);
+        if (globalHealth < 100) {
+          globalHealth = Math.min(100, globalHealth + 0.5);
+        } else if (trainingUnlocked) {
+          globalTraining = Math.min(100, globalTraining + 0.5);
+        }
+      }
     }
-  } else {
-    if (globalTraining < 100) {
-      globalTraining += 0.05 * statBoostAmount();
-    }
-  }
+  });
 
-  globalHealth = Phaser.Math.Clamp(globalHealth, 0, 100);
-  globalTraining = Phaser.Math.Clamp(globalTraining, 0, 100);
-
-  // Victory condition
-  if (globalHealth === 100 && globalTraining === 100 && !victoryAchieved) {
-    this.victoryText.setText('Super Star Pet Vibes');
-    this.mintButton.setText('Mint your prize');
-    this.mintButton.setVisible(true);
-    victoryAchieved = true;
-  }
+  requestAnimationFrame(gameLoop);
 }
 
-function modifyStat(stat, amount) {
-  if (statCooldowns[stat] <= 0) {
-    petStats[stat] += amount;
-    petStats[stat] = Phaser.Math.Clamp(petStats[stat], 0, 100);
-    statCooldowns[stat] = 3; // 3 second cooldown
-  }
+document.getElementById("btnEat").addEventListener("click", () => movePetTo("btnEat"));
+document.getElementById("btnSleep").addEventListener("click", () => movePetTo("btnSleep"));
+document.getElementById("btnWash").addEventListener("click", () => movePetTo("btnWash"));
+document.getElementById("btnPlay").addEventListener("click", () => movePetTo("btnPlay"));
+
+function movePetTo(buttonId) {
+  const btn = document.getElementById(buttonId);
+  const rect = btn.getBoundingClientRect();
+  const canvasRect = canvas.getBoundingClientRect();
+  const targetX = rect.left - canvasRect.left + rect.width / 2 - pet.width / 2;
+  const targetY = rect.top - canvasRect.top + rect.height / 2 - pet.height / 2;
+
+  pet.x = targetX;
+  pet.y = targetY;
 }
 
-function statBoostAmount() {
-  // Determines how much stat level contributes to global fill
-  return (petStats.eat + petStats.sleep + petStats.wash + petStats.play) / 400;
-}
+window.addEventListener("load", () => {
+  resizeCanvas();
+  console.log("Canvas:", canvas.width, canvas.height);
+  console.log("Pet Position:", pet.x, pet.y);
+  gameLoop();
+});
