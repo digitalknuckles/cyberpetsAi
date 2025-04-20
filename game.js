@@ -7,11 +7,15 @@ const ctx = canvas.getContext("2d");
 let pet = {
   x: 100,
   y: 100,
-  width: 50,
-  height: 50,
-  color: "green",
-  speed: 2,
-  status: {
+  vx: 2,
+  vy: 2,
+  width: 100,
+  height: 100,
+  speedMultiplier: 1,
+  sprite: null,
+  animationFrames: [],
+  currentFrame: 0,
+  stats: {
     eat: 100,
     sleep: 100,
     wash: 100,
@@ -19,188 +23,138 @@ let pet = {
   }
 };
 
-let target = null;
-let touchTarget = null;
-let tapTarget = null;
-let statusDecayRate = 0.05;
-let frameCounter = 0;
-let gameOver = false;
-let victory = false;
-
-const statusElements = ['eat', 'sleep', 'wash', 'play'];
-
 function resizeCanvas() {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
 }
 
-function randomRoam() {
-  if (!target || Math.random() < 0.01) {
-    target = {
-      x: Math.random() * (canvas.width - 100),
-      y: Math.random() * (canvas.height - 100)
-    };
-  }
-  moveTowards(target);
-}
+function loadSprites() {
+  pet.sprite = new Image();
+  pet.sprite.src = "assets/pet-idle.png";
 
-function moveTowards(dest) {
-  let dx = dest.x - pet.x;
-  let dy = dest.y - pet.y;
-  let distance = Math.sqrt(dx * dx + dy * dy);
-  if (distance > 1) {
-    pet.x += (dx / distance) * pet.speed;
-    pet.y += (dy / distance) * pet.speed;
+  for (let i = 1; i <= 3; i++) {
+    let frame = new Image();
+    frame.src = `assets/pet-animation-${i}.png`;
+    pet.animationFrames.push(frame);
   }
 }
 
 function drawPet() {
-  ctx.fillStyle = pet.color;
-  ctx.fillRect(pet.x, pet.y, pet.width, pet.height);
-}
-
-function drawStatusBars() {
-  let y = 10;
-  statusElements.forEach(stat => {
-    const val = pet.status[stat];
-    ctx.fillStyle = val <= 25 ? (frameCounter % 30 < 15 ? "red" : "darkred") :
-                     val >= 100 ? (frameCounter % 30 < 15 ? "lime" : "green") :
-                     val >= 50 ? "green" : "red";
-    ctx.fillRect(10, y, val * 2, 20);
-    ctx.strokeStyle = "#fff";
-    ctx.strokeRect(10, y, 200, 20);
-    ctx.fillStyle = "#fff";
-    ctx.fillText(`${stat.toUpperCase()}: ${Math.floor(val)}`, 220, y + 15);
-    y += 30;
-  });
-}
-
-function drawGlobalHealthBar() {
-  const hp = getGlobalHP();
-  ctx.fillStyle = hp <= 10 ? (frameCounter % 30 < 15 ? "red" : "darkred") :
-                   hp >= 95 ? (frameCounter % 30 < 15 ? "lime" : "green") :
-                   hp >= 50 ? "green" : "orange";
-  ctx.fillRect(10, canvas.height - 40, hp * 2, 20);
-  ctx.strokeStyle = "#fff";
-  ctx.strokeRect(10, canvas.height - 40, 200, 20);
-  ctx.fillStyle = "#fff";
-  ctx.fillText(`GLOBAL HP: ${Math.floor(hp)}`, 220, canvas.height - 25);
-  if (hp <= 10) ctx.fillText("Condition Critical", pet.x + 60, pet.y);
-}
-
-function getGlobalHP() {
-  let sum = 0;
-  statusElements.forEach(stat => sum += pet.status[stat]);
-  return sum / 4;
-}
-
-function updateStatusDecay() {
-  statusElements.forEach(stat => {
-    pet.status[stat] = Math.max(0, pet.status[stat] - statusDecayRate);
-  });
-}
-
-function checkVictoryCondition() {
-  const hp = getGlobalHP();
-  if (hp >= 95 && !victory) {
-    pet.speed *= 2;
-    victory = true;
-    console.log("Victory achieved! Minting NFT...");
-    mintPrize();
+  const img = pet.sprite;
+  if (img && img.complete) {
+    ctx.drawImage(img, pet.x, pet.y, pet.width, pet.height);
   }
 }
 
-function checkGameOver() {
-  if (statusElements.every(stat => pet.status[stat] <= 1)) {
-    gameOver = true;
-    ctx.fillStyle = "white";
-    ctx.font = "32px sans-serif";
-    ctx.fillText("Game Over: Pet has Disappeared", canvas.width / 2 - 150, canvas.height / 2);
+function updateStats() {
+  for (let key in pet.stats) {
+    pet.stats[key] = Math.max(0, pet.stats[key] - 0.02);
   }
 }
 
-function checkCollision(buttonId, statName, amount = 20) {
-  const btn = document.getElementById(buttonId);
+function drawHUD() {
+  Object.keys(pet.stats).forEach((key) => {
+    const bar = document.getElementById(`${key}Bar`);
+    bar.style.width = `${pet.stats[key]}%`;
+
+    if (pet.stats[key] >= 100) {
+      bar.className = "status-bar blink-green";
+    } else if (pet.stats[key] <= 25) {
+      bar.className = "status-bar blink-red";
+    } else if (pet.stats[key] < 50) {
+      bar.className = "status-bar red";
+    } else {
+      bar.className = "status-bar green";
+    }
+  });
+
+  const totalHP = Object.values(pet.stats).reduce((a, b) => a + b, 0) / 4;
+  const hpBar = document.getElementById("globalHealthBar");
+  hpBar.style.width = `${totalHP}%`;
+
+  if (totalHP < 10) {
+    document.getElementById("criticalWarning").style.display = "block";
+  } else {
+    document.getElementById("criticalWarning").style.display = "none";
+  }
+}
+
+function checkGameConditions() {
+  const values = Object.values(pet.stats);
+  const allZero = values.every((v) => v <= 1);
+  const totalHP = values.reduce((a, b) => a + b, 0) / 4;
+
+  if (allZero) {
+    alert("Game Over: Pet has Disappeared");
+    window.location.reload();
+  }
+
+  if (totalHP >= 95 && !window.victoryAchieved) {
+    window.victoryAchieved = true;
+    pet.speedMultiplier = 2;
+    alert("Victory!");
+    // Placeholder for NFT mint logic
+    // mintPrize();
+  }
+}
+
+function movePet() {
+  pet.x += pet.vx * pet.speedMultiplier;
+  pet.y += pet.vy * pet.speedMultiplier;
+
+  if (pet.x <= 0 || pet.x + pet.width >= canvas.width) pet.vx *= -1;
+  if (pet.y <= 0 || pet.y + pet.height >= canvas.height) pet.vy *= -1;
+}
+
+function isCollidingWithButton(btnId) {
+  const btn = document.getElementById(btnId);
   const rect = btn.getBoundingClientRect();
   const canvasRect = canvas.getBoundingClientRect();
-  const btnX = rect.left - canvasRect.left;
-  const btnY = rect.top - canvasRect.top;
+  const bx = rect.left - canvasRect.left;
+  const by = rect.top - canvasRect.top;
 
-  if (
-    pet.x < btnX + rect.width &&
-    pet.x + pet.width > btnX &&
-    pet.y < btnY + rect.height &&
-    pet.y + pet.height > btnY
-  ) {
-    pet.status[statName] = Math.min(100, pet.status[statName] + amount);
-  }
-}
-
-function triggerMiniGame(x, y) {
-  if (x < canvas.width / 2 && y < canvas.height / 2) {
-    pet.status.play = Math.min(100, pet.status.play + 10);
-  } else if (x > canvas.width / 2 && y < canvas.height / 2) {
-    pet.status.eat = Math.min(100, pet.status.eat + 10);
-  } else if (x < canvas.width / 2 && y > canvas.height / 2) {
-    pet.status.sleep = Math.min(100, pet.status.sleep + 10);
-  } else {
-    pet.status.wash = Math.min(100, pet.status.wash + 10);
-  }
+  return (
+    pet.x < bx + rect.width &&
+    pet.x + pet.width > bx &&
+    pet.y < by + rect.height &&
+    pet.y + pet.height > by
+  );
 }
 
 function gameLoop() {
-  if (gameOver) return;
-  frameCounter++;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  if (touchTarget) {
-    moveTowards(touchTarget);
-  } else if (tapTarget) {
-    moveTowards(tapTarget);
-    if (Math.abs(pet.x - tapTarget.x) < 5 && Math.abs(pet.y - tapTarget.y) < 5) {
-      triggerMiniGame(tapTarget.x, tapTarget.y);
-      tapTarget = null;
-    }
-  } else {
-    randomRoam();
-  }
-
+  movePet();
   drawPet();
-  drawStatusBars();
-  drawGlobalHealthBar();
-  updateStatusDecay();
+  updateStats();
+  drawHUD();
+  checkGameConditions();
 
-  checkCollision("btnEat", "eat");
-  checkCollision("btnSleep", "sleep");
-  checkCollision("btnWash", "wash");
-  checkCollision("btnPlay", "play");
+  if (isCollidingWithButton("btnEat")) pet.stats.eat = Math.min(100, pet.stats.eat + 1);
+  if (isCollidingWithButton("btnSleep")) pet.stats.sleep = Math.min(100, pet.stats.sleep + 1);
+  if (isCollidingWithButton("btnWash")) pet.stats.wash = Math.min(100, pet.stats.wash + 1);
+  if (isCollidingWithButton("btnPlay")) pet.stats.play = Math.min(100, pet.stats.play + 1);
 
-  checkVictoryCondition();
-  checkGameOver();
   requestAnimationFrame(gameLoop);
 }
 
-canvas.addEventListener("touchstart", (e) => {
-  const touch = e.touches[0];
-  const rect = canvas.getBoundingClientRect();
-  touchTarget = {
-    x: touch.clientX - rect.left,
-    y: touch.clientY - rect.top
-  };
-});
+document.getElementById("btnEat").addEventListener("click", () => movePetTo("btnEat"));
+document.getElementById("btnSleep").addEventListener("click", () => movePetTo("btnSleep"));
+document.getElementById("btnWash").addEventListener("click", () => movePetTo("btnWash"));
+document.getElementById("btnPlay").addEventListener("click", () => movePetTo("btnPlay"));
 
-canvas.addEventListener("touchend", () => {
-  touchTarget = null;
-});
+function movePetTo(buttonId) {
+  const btn = document.getElementById(buttonId);
+  const rect = btn.getBoundingClientRect();
+  const canvasRect = canvas.getBoundingClientRect();
+  const targetX = rect.left - canvasRect.left;
+  const targetY = rect.top - canvasRect.top;
 
-canvas.addEventListener("click", (e) => {
-  const rect = canvas.getBoundingClientRect();
-  tapTarget = {
-    x: e.clientX - rect.left,
-    y: e.clientY - rect.top
-  };
-});
+  pet.x = targetX;
+  pet.y = targetY;
+}
 
 window.addEventListener("resize", resizeCanvas);
 resizeCanvas();
+loadSprites();
 gameLoop();
+
