@@ -23,6 +23,8 @@ let pet = {
   }
 };
 
+let target = null;
+
 function resizeCanvas() {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
@@ -40,7 +42,7 @@ function loadSprites() {
 }
 
 function drawPet() {
-  const img = pet.sprite;
+  const img = pet.animationFrames[pet.currentFrame] || pet.sprite;
   if (img && img.complete) {
     ctx.drawImage(img, pet.x, pet.y, pet.width, pet.height);
   }
@@ -79,31 +81,82 @@ function drawHUD() {
   }
 }
 
+function showVictoryScreen() {
+  const overlay = document.createElement("div");
+  overlay.id = "victoryScreen";
+  overlay.style.position = "fixed";
+  overlay.style.top = 0;
+  overlay.style.left = 0;
+  overlay.style.width = "100%";
+  overlay.style.height = "100%";
+  overlay.style.backgroundColor = "rgba(0, 0, 0, 0.8)";
+  overlay.style.display = "flex";
+  overlay.style.flexDirection = "column";
+  overlay.style.justifyContent = "center";
+  overlay.style.alignItems = "center";
+  overlay.style.zIndex = 999;
+
+  const message = document.createElement("h1");
+  message.innerText = "🎉 Victory! Your pet is thriving! 🎉";
+  message.style.color = "#fff";
+  message.style.marginBottom = "20px";
+
+  const mintButton = document.createElement("button");
+  mintButton.innerText = "Mint Your NFT Prize";
+  mintButton.style.padding = "12px 20px";
+  mintButton.style.fontSize = "18px";
+  mintButton.style.cursor = "pointer";
+  mintButton.onclick = async () => {
+    mintButton.disabled = true;
+    mintButton.innerText = "Minting...";
+    await mintPrize();
+    mintButton.innerText = "Minted!";
+  };
+
+  overlay.appendChild(message);
+  overlay.appendChild(mintButton);
+  document.body.appendChild(overlay);
+}
+
 function checkGameConditions() {
   const values = Object.values(pet.stats);
   const allZero = values.every((v) => v <= 1);
   const totalHP = values.reduce((a, b) => a + b, 0) / 4;
 
-  if (allZero) {
-    alert("Game Over: Pet has Disappeared");
-    window.location.reload();
+  if (allZero && !window.gameEnded) {
+    window.gameEnded = true;
+    setTimeout(() => {
+      alert("Game Over: Pet has Disappeared");
+      window.location.reload();
+    }, 1000);
   }
 
   if (totalHP >= 95 && !window.victoryAchieved) {
     window.victoryAchieved = true;
     pet.speedMultiplier = 2;
-    alert("Victory!");
-    // Placeholder for NFT mint logic
-    // mintPrize();
+    showVictoryScreen();
   }
 }
 
 function movePet() {
-  pet.x += pet.vx * pet.speedMultiplier;
-  pet.y += pet.vy * pet.speedMultiplier;
+  if (target) {
+    const dx = target.x - pet.x;
+    const dy = target.y - pet.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
 
-  if (pet.x <= 0 || pet.x + pet.width >= canvas.width) pet.vx *= -1;
-  if (pet.y <= 0 || pet.y + pet.height >= canvas.height) pet.vy *= -1;
+    if (dist < 5) {
+      target = null;
+    } else {
+      pet.x += (dx / dist) * pet.vx * pet.speedMultiplier;
+      pet.y += (dy / dist) * pet.vy * pet.speedMultiplier;
+    }
+  } else {
+    pet.x += pet.vx * pet.speedMultiplier;
+    pet.y += pet.vy * pet.speedMultiplier;
+
+    if (pet.x <= 0 || pet.x + pet.width >= canvas.width) pet.vx *= -1;
+    if (pet.y <= 0 || pet.y + pet.height >= canvas.height) pet.vy *= -1;
+  }
 }
 
 function isCollidingWithButton(btnId) {
@@ -123,6 +176,8 @@ function isCollidingWithButton(btnId) {
 
 function gameLoop() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  pet.currentFrame = (pet.currentFrame + 1) % pet.animationFrames.length;
   movePet();
   drawPet();
   updateStats();
@@ -137,24 +192,30 @@ function gameLoop() {
   requestAnimationFrame(gameLoop);
 }
 
-document.getElementById("btnEat").addEventListener("click", () => movePetTo("btnEat"));
-document.getElementById("btnSleep").addEventListener("click", () => movePetTo("btnSleep"));
-document.getElementById("btnWash").addEventListener("click", () => movePetTo("btnWash"));
-document.getElementById("btnPlay").addEventListener("click", () => movePetTo("btnPlay"));
-
 function movePetTo(buttonId) {
   const btn = document.getElementById(buttonId);
   const rect = btn.getBoundingClientRect();
   const canvasRect = canvas.getBoundingClientRect();
-  const targetX = rect.left - canvasRect.left;
-  const targetY = rect.top - canvasRect.top;
-
-  pet.x = targetX;
-  pet.y = targetY;
+  target = {
+    x: rect.left - canvasRect.left,
+    y: rect.top - canvasRect.top
+  };
 }
+
+["btnEat", "btnSleep", "btnWash", "btnPlay"].forEach((id) => {
+  const btn = document.getElementById(id);
+  btn.addEventListener("click", () => movePetTo(id));
+  btn.addEventListener("touchstart", () => movePetTo(id));
+});
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "e") movePetTo("btnEat");
+  if (e.key === "s") movePetTo("btnSleep");
+  if (e.key === "w") movePetTo("btnWash");
+  if (e.key === "p") movePetTo("btnPlay");
+});
 
 window.addEventListener("resize", resizeCanvas);
 resizeCanvas();
 loadSprites();
 gameLoop();
-
