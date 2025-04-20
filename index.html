@@ -1,77 +1,63 @@
-// game.js
-const canvas = document.getElementById("gameCanvas");
-const ctx = canvas.getContext("2d");
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>Digital Pet Game</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: #222;
+      font-family: sans-serif;
+    }
 
-let pet = {
-  x: 100,
-  y: 100,
-  sprite: null, // Placeholder for static image
-  animationFrames: [], // Placeholder for animation
-  currentFrame: 0,
-  health: 100,
-  happiness: 100
-};
+    canvas {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+      touch-action: none;
+    }
 
-function resizeCanvas() {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-}
+    #ui {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      right: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-around;
+      gap: 10px;
+    }
 
-function loadSprites() {
-  // Load a static image
-  pet.sprite = new Image();
-  pet.sprite.src = "assets/pet-idle.png";
+    .btn {
+      background-color: #444;
+      color: #fff;
+      padding: 10px 14px;
+      border: none;
+      border-radius: 12px;
+      font-size: 14px;
+      cursor: pointer;
+    }
 
-  // Example of loading frames (placeholder)
-  for (let i = 1; i <= 3; i++) {
-    let frame = new Image();
-    frame.src = `assets/pet-animation-${i}.png`;
-    pet.animationFrames.push(frame);
-  }
-}
+    .btn:focus {
+      outline: 2px solid #00f;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="gameCanvas"></canvas>
 
-function drawPet() {
-  const img = pet.sprite; // Replace with animation logic later
-  if (img && img.complete) {
-    ctx.drawImage(img, pet.x, pet.y, 150, 150);
-  }
-}
+  <div id="ui">
+    <button class="btn" id="btnEat" tabindex="1">🍔 Eat</button>
+    <button class="btn" id="btnSleep" tabindex="2">😴 Sleep</button>
+    <button class="btn" id="btnWash" tabindex="3">🛁 Wash</button>
+    <button class="btn" id="btnPlay" tabindex="4">🎮 Play</button>
+    <button class="btn" id="btnConnect" tabindex="5">🔌 Connect Wallet</button>
+  </div>
 
-function gameLoop() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  // Placeholder: animate background or pet
-  drawPet();
-
-  requestAnimationFrame(gameLoop);
-}
-
-// UI actions
-function handleEat() {
-  pet.health = Math.min(100, pet.health + 10);
-}
-
-function handleSleep() {
-  pet.health = Math.min(100, pet.health + 5);
-}
-
-function handleWash() {
-  pet.health = Math.min(100, pet.health + 3);
-}
-
-function handlePlay() {
-  pet.happiness = Math.min(100, pet.happiness + 10);
-}
-
-// Attach UI logic
-document.getElementById("btnEat").addEventListener("click", handleEat);
-document.getElementById("btnSleep").addEventListener("click", handleSleep);
-document.getElementById("btnWash").addEventListener("click", handleWash);
-document.getElementById("btnPlay").addEventListener("click", handlePlay);
-
-window.addEventListener("resize", resizeCanvas);
-
-// Start game
-resizeCanvas();
-loadSprites();
-gameLoop();
+  <script src="game.js" type="module"></script>
+  <script src="walletconnect.js" type="module"></script>
+</body>
+</html>
