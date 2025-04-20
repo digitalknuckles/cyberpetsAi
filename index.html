@@ -5,12 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
   <title>Digital Pet Game</title>
   <style>
-    body, html {
+    * {
       margin: 0;
       padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      background-color: #111;
+      font-family: 'Arial', sans-serif;
       overflow: hidden;
-      background: #222;
-      font-family: sans-serif;
     }
 
     canvas {
@@ -28,8 +34,14 @@
       display: flex;
       flex-wrap: wrap;
       justify-content: space-around;
-      gap: 10px;
-      z-index: 2;
+      gap: 20px;
+      z-index: 10;
+    }
+
+    .btn-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
 
     .btn {
@@ -40,46 +52,35 @@
       border-radius: 12px;
       font-size: 14px;
       cursor: pointer;
-    }
-
-    .btn:focus {
-      outline: 2px solid #00f;
-    }
-
-    #stats {
-      position: absolute;
-      bottom: 10px;
-      left: 10px;
-      right: 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      z-index: 2;
-    }
-
-    .status-container {
-      background: #333;
-      height: 12px;
-      border-radius: 6px;
-      overflow: hidden;
+      min-width: 80px;
     }
 
     .status-bar {
-      height: 100%;
+      margin-top: 4px;
+      height: 6px;
+      border-radius: 3px;
+      background: #333;
       width: 100%;
-      transition: width 0.3s ease;
+      overflow: hidden;
     }
 
-    .green { background-color: #2ecc71; }
-    .red { background-color: #e74c3c; }
+    .status-bar::after {
+      content: "";
+      display: block;
+      height: 100%;
+      background: limegreen;
+      width: 100%;
+      transition: width 0.2s;
+    }
 
-    .blink-green {
-      background-color: #2ecc71;
+    .green::after { background: limegreen; }
+    .red::after { background: red; }
+    .blink-red::after {
+      background: red;
       animation: blink 1s infinite;
     }
-
-    .blink-red {
-      background-color: #e74c3c;
+    .blink-green::after {
+      background: limegreen;
       animation: blink 1s infinite;
     }
 
@@ -88,18 +89,31 @@
       50% { opacity: 0.3; }
     }
 
+    #globalHealthContainer {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      width: 200px;
+      height: 10px;
+      background: #333;
+      border-radius: 5px;
+      overflow: hidden;
+    }
+
+    #globalHealthBar {
+      width: 100%;
+      height: 100%;
+      background: limegreen;
+      transition: width 0.2s;
+    }
+
     #criticalWarning {
       position: absolute;
-      bottom: 80px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #e74c3c;
-      color: white;
-      padding: 8px 16px;
-      border-radius: 10px;
+      bottom: 30px;
+      right: 10px;
+      color: red;
       font-weight: bold;
       display: none;
-      z-index: 3;
     }
   </style>
 </head>
@@ -107,24 +121,35 @@
   <canvas id="gameCanvas"></canvas>
 
   <div id="ui">
-    <button class="btn" id="btnEat" tabindex="1">🍔 Eat</button>
-    <button class="btn" id="btnSleep" tabindex="2">😴 Sleep</button>
-    <button class="btn" id="btnWash" tabindex="3">🛁 Wash</button>
-    <button class="btn" id="btnPlay" tabindex="4">🎮 Play</button>
-    <button class="btn" id="btnConnect" tabindex="5">🔌 Connect Wallet</button>
+    <div class="btn-group">
+      <button class="btn" id="btnEat" tabindex="1">🍔 Eat</button>
+      <div class="status-bar" id="eatBar"></div>
+    </div>
+    <div class="btn-group">
+      <button class="btn" id="btnSleep" tabindex="2">😴 Sleep</button>
+      <div class="status-bar" id="sleepBar"></div>
+    </div>
+    <div class="btn-group">
+      <button class="btn" id="btnWash" tabindex="3">🛁 Wash</button>
+      <div class="status-bar" id="washBar"></div>
+    </div>
+    <div class="btn-group">
+      <button class="btn" id="btnPlay" tabindex="4">🎮 Play</button>
+      <div class="status-bar" id="playBar"></div>
+    </div>
+    <div class="btn-group">
+      <button class="btn" id="btnConnect" tabindex="5">🔌 Connect Wallet</button>
+    </div>
   </div>
 
-  <div id="stats">
-    <div class="status-container"><div id="eatBar" class="status-bar green"></div></div>
-    <div class="status-container"><div id="sleepBar" class="status-bar green"></div></div>
-    <div class="status-container"><div id="washBar" class="status-bar green"></div></div>
-    <div class="status-container"><div id="playBar" class="status-bar green"></div></div>
-    <div class="status-container"><div id="globalHealthBar" class="status-bar green"></div></div>
+  <div id="criticalWarning">⚠️ Critical Health!</div>
+  <div id="globalHealthContainer">
+    <div id="globalHealthBar"></div>
   </div>
 
-  <div id="criticalWarning">⚠️ Critical Health: Your pet is in danger!</div>
-
-  <script src="game.js" type="module"></script>
-  <script src="walletconnect.js" type="module"></script>
+  <script type="module">
+    import { mintPrize } from './walletconnect.js';
+    import './game.js';
+  </script>
 </body>
 </html>
