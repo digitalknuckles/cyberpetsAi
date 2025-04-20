@@ -1,7 +1,7 @@
-// game.js
-
 import { mintPrize } from './walletconnect.js';
-let canvas, ctx;
+
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
 
 let pet = {
   x: 100,
@@ -20,11 +20,15 @@ let pet = {
   }
 };
 
+// Set the image source and wait for it to load
 pet.sprite.src = "assets/RobotTeddy_Ai.png";
-
-// Optional: Debug when image loads
 pet.sprite.onload = () => {
-  console.log("Pet image loaded!");
+  console.log('Pet sprite loaded successfully');
+};
+
+// Image loading error handler
+pet.sprite.onerror = () => {
+  console.error('Failed to load pet sprite image');
 };
 
 function resizeCanvas() {
@@ -33,10 +37,10 @@ function resizeCanvas() {
 }
 
 function drawPet() {
-  if (pet.sprite.complete) {
+  if (pet.sprite.complete && pet.sprite.naturalWidth > 0 && pet.sprite.naturalHeight > 0) {
     ctx.drawImage(pet.sprite, pet.x, pet.y, pet.width, pet.height);
   } else {
-    // fallback: red box
+    // Draw a temporary red box for visibility if image isn't loaded
     ctx.fillStyle = "red";
     ctx.fillRect(pet.x, pet.y, pet.width, pet.height);
   }
@@ -135,6 +139,11 @@ function gameLoop() {
   requestAnimationFrame(gameLoop);
 }
 
+document.getElementById("btnEat").addEventListener("click", () => movePetTo("btnEat"));
+document.getElementById("btnSleep").addEventListener("click", () => movePetTo("btnSleep"));
+document.getElementById("btnWash").addEventListener("click", () => movePetTo("btnWash"));
+document.getElementById("btnPlay").addEventListener("click", () => movePetTo("btnPlay"));
+
 function movePetTo(buttonId) {
   const btn = document.getElementById(buttonId);
   const rect = btn.getBoundingClientRect();
@@ -147,17 +156,8 @@ function movePetTo(buttonId) {
 }
 
 window.addEventListener("load", () => {
-  canvas = document.getElementById("gameCanvas");
-  ctx = canvas.getContext("2d");
-
   resizeCanvas();
   console.log("Canvas:", canvas.width, canvas.height);
   console.log("Pet Position:", pet.x, pet.y);
   gameLoop();
-
-  // Bind buttons once canvas is ready
-  document.getElementById("btnEat").addEventListener("click", () => movePetTo("btnEat"));
-  document.getElementById("btnSleep").addEventListener("click", () => movePetTo("btnSleep"));
-  document.getElementById("btnWash").addEventListener("click", () => movePetTo("btnWash"));
-  document.getElementById("btnPlay").addEventListener("click", () => movePetTo("btnPlay"));
 });
