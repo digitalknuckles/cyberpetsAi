@@ -29,6 +29,7 @@
       flex-wrap: wrap;
       justify-content: space-around;
       gap: 10px;
+      z-index: 2;
     }
 
     .btn {
@@ -44,6 +45,62 @@
     .btn:focus {
       outline: 2px solid #00f;
     }
+
+    #stats {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      right: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      z-index: 2;
+    }
+
+    .status-container {
+      background: #333;
+      height: 12px;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .status-bar {
+      height: 100%;
+      width: 100%;
+      transition: width 0.3s ease;
+    }
+
+    .green { background-color: #2ecc71; }
+    .red { background-color: #e74c3c; }
+
+    .blink-green {
+      background-color: #2ecc71;
+      animation: blink 1s infinite;
+    }
+
+    .blink-red {
+      background-color: #e74c3c;
+      animation: blink 1s infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    #criticalWarning {
+      position: absolute;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #e74c3c;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-weight: bold;
+      display: none;
+      z-index: 3;
+    }
   </style>
 </head>
 <body>
@@ -56,6 +113,16 @@
     <button class="btn" id="btnPlay" tabindex="4">🎮 Play</button>
     <button class="btn" id="btnConnect" tabindex="5">🔌 Connect Wallet</button>
   </div>
+
+  <div id="stats">
+    <div class="status-container"><div id="eatBar" class="status-bar green"></div></div>
+    <div class="status-container"><div id="sleepBar" class="status-bar green"></div></div>
+    <div class="status-container"><div id="washBar" class="status-bar green"></div></div>
+    <div class="status-container"><div id="playBar" class="status-bar green"></div></div>
+    <div class="status-container"><div id="globalHealthBar" class="status-bar green"></div></div>
+  </div>
+
+  <div id="criticalWarning">⚠️ Critical Health: Your pet is in danger!</div>
 
   <script src="game.js" type="module"></script>
   <script src="walletconnect.js" type="module"></script>
