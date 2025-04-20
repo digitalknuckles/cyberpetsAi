@@ -7,14 +7,12 @@ const ctx = canvas.getContext("2d");
 let pet = {
   x: 100,
   y: 100,
-  vx: 2,
-  vy: 2,
-  width: 100,
-  height: 100,
+  vx: 1.5,
+  vy: 1.5,
+  width: 80,
+  height: 80,
   speedMultiplier: 1,
-  sprite: null,
-  animationFrames: [],
-  currentFrame: 0,
+  sprite: new Image(),
   stats: {
     eat: 100,
     sleep: 100,
@@ -23,28 +21,16 @@ let pet = {
   }
 };
 
-let target = null;
+pet.sprite.src = "assets/RobotTeddy_Ai.png";
 
 function resizeCanvas() {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
 }
 
-function loadSprites() {
-  pet.sprite = new Image();
-  pet.sprite.src = "assets/pet-idle.png";
-
-  for (let i = 1; i <= 3; i++) {
-    let frame = new Image();
-    frame.src = `assets/pet-animation-${i}.png`;
-    pet.animationFrames.push(frame);
-  }
-}
-
 function drawPet() {
-  const img = pet.animationFrames[pet.currentFrame] || pet.sprite;
-  if (img && img.complete) {
-    ctx.drawImage(img, pet.x, pet.y, pet.width, pet.height);
+  if (pet.sprite.complete) {
+    ctx.drawImage(pet.sprite, pet.x, pet.y, pet.width, pet.height);
   }
 }
 
@@ -57,65 +43,31 @@ function updateStats() {
 function drawHUD() {
   Object.keys(pet.stats).forEach((key) => {
     const bar = document.getElementById(`${key}Bar`);
-    bar.style.width = `${pet.stats[key]}%`;
+    if (bar) {
+      bar.style.width = `${pet.stats[key]}%`;
 
-    if (pet.stats[key] >= 100) {
-      bar.className = "status-bar blink-green";
-    } else if (pet.stats[key] <= 25) {
-      bar.className = "status-bar blink-red";
-    } else if (pet.stats[key] < 50) {
-      bar.className = "status-bar red";
-    } else {
-      bar.className = "status-bar green";
+      if (pet.stats[key] >= 100) {
+        bar.className = "status-bar blink-green";
+      } else if (pet.stats[key] <= 25) {
+        bar.className = "status-bar blink-red";
+      } else if (pet.stats[key] < 50) {
+        bar.className = "status-bar red";
+      } else {
+        bar.className = "status-bar green";
+      }
     }
   });
 
   const totalHP = Object.values(pet.stats).reduce((a, b) => a + b, 0) / 4;
   const hpBar = document.getElementById("globalHealthBar");
-  hpBar.style.width = `${totalHP}%`;
-
-  if (totalHP < 10) {
-    document.getElementById("criticalWarning").style.display = "block";
-  } else {
-    document.getElementById("criticalWarning").style.display = "none";
+  if (hpBar) {
+    hpBar.style.width = `${totalHP}%`;
   }
-}
 
-function showVictoryScreen() {
-  const overlay = document.createElement("div");
-  overlay.id = "victoryScreen";
-  overlay.style.position = "fixed";
-  overlay.style.top = 0;
-  overlay.style.left = 0;
-  overlay.style.width = "100%";
-  overlay.style.height = "100%";
-  overlay.style.backgroundColor = "rgba(0, 0, 0, 0.8)";
-  overlay.style.display = "flex";
-  overlay.style.flexDirection = "column";
-  overlay.style.justifyContent = "center";
-  overlay.style.alignItems = "center";
-  overlay.style.zIndex = 999;
-
-  const message = document.createElement("h1");
-  message.innerText = "🎉 Victory! Your pet is thriving! 🎉";
-  message.style.color = "#fff";
-  message.style.marginBottom = "20px";
-
-  const mintButton = document.createElement("button");
-  mintButton.innerText = "Mint Your NFT Prize";
-  mintButton.style.padding = "12px 20px";
-  mintButton.style.fontSize = "18px";
-  mintButton.style.cursor = "pointer";
-  mintButton.onclick = async () => {
-    mintButton.disabled = true;
-    mintButton.innerText = "Minting...";
-    await mintPrize();
-    mintButton.innerText = "Minted!";
-  };
-
-  overlay.appendChild(message);
-  overlay.appendChild(mintButton);
-  document.body.appendChild(overlay);
+  const critical = document.getElementById("criticalWarning");
+  if (critical) {
+    critical.style.display = totalHP < 10 ? "block" : "none";
+  }
 }
 
 function checkGameConditions() {
@@ -123,40 +75,25 @@ function checkGameConditions() {
   const allZero = values.every((v) => v <= 1);
   const totalHP = values.reduce((a, b) => a + b, 0) / 4;
 
-  if (allZero && !window.gameEnded) {
-    window.gameEnded = true;
-    setTimeout(() => {
-      alert("Game Over: Pet has Disappeared");
-      window.location.reload();
-    }, 1000);
+  if (allZero) {
+    alert("Game Over: Pet has Disappeared");
+    window.location.reload();
   }
 
   if (totalHP >= 95 && !window.victoryAchieved) {
     window.victoryAchieved = true;
     pet.speedMultiplier = 2;
-    showVictoryScreen();
+    alert("Victory!");
+    mintPrize();
   }
 }
 
 function movePet() {
-  if (target) {
-    const dx = target.x - pet.x;
-    const dy = target.y - pet.y;
-    const dist = Math.sqrt(dx * dx + dy * dy);
+  pet.x += pet.vx * pet.speedMultiplier;
+  pet.y += pet.vy * pet.speedMultiplier;
 
-    if (dist < 5) {
-      target = null;
-    } else {
-      pet.x += (dx / dist) * pet.vx * pet.speedMultiplier;
-      pet.y += (dy / dist) * pet.vy * pet.speedMultiplier;
-    }
-  } else {
-    pet.x += pet.vx * pet.speedMultiplier;
-    pet.y += pet.vy * pet.speedMultiplier;
-
-    if (pet.x <= 0 || pet.x + pet.width >= canvas.width) pet.vx *= -1;
-    if (pet.y <= 0 || pet.y + pet.height >= canvas.height) pet.vy *= -1;
-  }
+  if (pet.x <= 0 || pet.x + pet.width >= canvas.width) pet.vx *= -1;
+  if (pet.y <= 0 || pet.y + pet.height >= canvas.height) pet.vy *= -1;
 }
 
 function isCollidingWithButton(btnId) {
@@ -176,8 +113,6 @@ function isCollidingWithButton(btnId) {
 
 function gameLoop() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  pet.currentFrame = (pet.currentFrame + 1) % pet.animationFrames.length;
   movePet();
   drawPet();
   updateStats();
@@ -192,30 +127,22 @@ function gameLoop() {
   requestAnimationFrame(gameLoop);
 }
 
+document.getElementById("btnEat").addEventListener("click", () => movePetTo("btnEat"));
+document.getElementById("btnSleep").addEventListener("click", () => movePetTo("btnSleep"));
+document.getElementById("btnWash").addEventListener("click", () => movePetTo("btnWash"));
+document.getElementById("btnPlay").addEventListener("click", () => movePetTo("btnPlay"));
+
 function movePetTo(buttonId) {
   const btn = document.getElementById(buttonId);
   const rect = btn.getBoundingClientRect();
   const canvasRect = canvas.getBoundingClientRect();
-  target = {
-    x: rect.left - canvasRect.left,
-    y: rect.top - canvasRect.top
-  };
+  const targetX = rect.left - canvasRect.left + rect.width / 2 - pet.width / 2;
+  const targetY = rect.top - canvasRect.top + rect.height / 2 - pet.height / 2;
+
+  pet.x = targetX;
+  pet.y = targetY;
 }
-
-["btnEat", "btnSleep", "btnWash", "btnPlay"].forEach((id) => {
-  const btn = document.getElementById(id);
-  btn.addEventListener("click", () => movePetTo(id));
-  btn.addEventListener("touchstart", () => movePetTo(id));
-});
-
-document.addEventListener("keydown", (e) => {
-  if (e.key === "e") movePetTo("btnEat");
-  if (e.key === "s") movePetTo("btnSleep");
-  if (e.key === "w") movePetTo("btnWash");
-  if (e.key === "p") movePetTo("btnPlay");
-});
 
 window.addEventListener("resize", resizeCanvas);
 resizeCanvas();
-loadSprites();
 gameLoop();
