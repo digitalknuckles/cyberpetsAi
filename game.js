@@ -19,7 +19,9 @@ let pet = {
     play: 100
   },
   isRoaming: true, // track if pet is roaming
-  targetStat: null // store which stat is being interacted with
+  targetStat: null, // store which stat is being interacted with
+  isPaused: false, // track if pet is paused
+  pauseDuration: 0, // track pause duration for pet
 };
 
 let globalHealth = 100;
@@ -193,9 +195,35 @@ function updateCooldowns() {
   }
 }
 
+function petCollisionWithStatObject(stat) {
+  if (pet.stats[stat] > 0) {
+    // Decrease stat by 15% on collision
+    pet.stats[stat] = Math.max(0, pet.stats[stat] - 15);
+    
+    // Pet changes path away from stat object
+    pet.isRoaming = true; // Reset pet to roaming state
+    
+    // Pause pet movement and trigger cooldown message for 3 seconds
+    pet.isPaused = true;
+    pet.pauseDuration = 0;
+    alert(`${stat.charAt(0).toUpperCase() + stat.slice(1)} collision! Reducing stat and taking a pause.`);
+    setTimeout(() => {
+      pet.isPaused = false;
+    }, 3000);
+  }
+}
+
 function gameLoop() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  movePet();
+  
+  // Pause pet if in paused state
+  if (pet.isPaused) {
+    pet.pauseDuration++;
+    if (pet.pauseDuration > 3) pet.isPaused = false; // Reset after 3 seconds pause
+  } else {
+    movePet();
+  }
+
   updateStats();
   drawPet();
   drawHUD();
