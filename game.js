@@ -86,7 +86,6 @@ function drawHUD() {
       else bar.className = "status-bar green";
     }
 
-    // Update cooldown visual
     const btn = document.getElementById(`btn${capitalize(key)}`);
     if (btn) {
       if (statCooldowns[key] > 0) {
@@ -121,6 +120,10 @@ function checkGameConditions() {
   if (globalHealth >= 100 && !trainingUnlocked) {
     trainingUnlocked = true;
     console.log("Training Unlocked!");
+  }
+
+  if (trainingUnlocked && globalHealth >= 100) {
+    globalTraining = Math.min(100, globalTraining + 0.25);
   }
 
   if (globalHealth >= 100 && trainingUnlocked && globalTraining >= 100 && !window.victoryAchieved) {
@@ -183,10 +186,6 @@ function handleStatInteraction(stat) {
   statCooldowns[stat] = 10;
   lastStatInteraction = Date.now();
 
-  if (pet.stats[stat] === 100) {
-    globalHealth = Math.min(100, globalHealth + 5);
-  }
-
   if (Object.values(pet.stats).every(value => value > 0)) {
     pet.isRoaming = true;
     pet.targetStat = null;
@@ -217,8 +216,12 @@ function updateCooldowns() {
     }
   }
 
-  if (Object.values(pet.stats).every(value => value > 75)) {
-    globalHealth = Math.min(100, globalHealth + 10);
+  const statsValues = Object.values(pet.stats);
+  const allHigh = statsValues.every(value => value >= 80);
+  const allMax = statsValues.every(value => value === 100);
+
+  if (allHigh) {
+    globalHealth = Math.min(100, globalHealth + 0.15);
   }
 }
 
