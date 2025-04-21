@@ -294,6 +294,3 @@ window.addEventListener("load", () => {
   });
   gameLoop();
 });
-
-  gameLoop();
-});
