@@ -7,7 +7,19 @@ const cooldowns = {
   wash: 0,
   play: 0
 };
-
+// Define pet object
+let pet = {
+  x: 100, // starting x position
+  y: 100, // starting y position
+  width: 50, // for positioning on button centers
+  height: 50,
+  stats: {
+    eat: 100,
+    sleep: 100,
+    wash: 100,
+    play: 100
+  }
+};
 // Helper to get button center
 function getButtonCenter(buttonId) {
   const btn = document.getElementById(buttonId);
