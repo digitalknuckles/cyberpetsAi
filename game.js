@@ -88,6 +88,19 @@ function handleGlobalHealth(deltaTime) {
   }
 }
 
+// Handle pet interaction state behavior
+function handleInteractionBehavior() {
+  if (petState === "interacting" && targetStat) {
+    const { x, y } = getButtonCenter(`btn${capitalize(targetStat)}`);
+    const dx = x - pet.x;
+    const dy = y - pet.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    if (dist <= 2) {
+      interactWithStat(targetStat);
+    }
+  }
+}
+
 // Modified game loop
 let lastTime = performance.now();
 function gameLoop(currentTime) {
@@ -96,6 +109,7 @@ function gameLoop(currentTime) {
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   movePetBehavior();
+  handleInteractionBehavior();
   drawPet();
   updateStats();
   drawHUD();
