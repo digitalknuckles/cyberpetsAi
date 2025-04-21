@@ -18,10 +18,11 @@ let pet = {
     wash: 100,
     play: 100
   },
-  isRoaming: true, // track if pet is roaming
-  targetStat: null, // store which stat is being interacted with
-  isPaused: false, // track if pet is paused
-  pauseDuration: 0, // track pause duration for pet
+  isRoaming: true,
+  targetStat: null,
+  isPaused: false,
+  pauseDuration: 0,
+  collisionMsg: null
 };
 
 let globalHealth = 100;
@@ -35,7 +36,7 @@ let statCooldowns = {
   play: 0
 };
 
-let lastStatInteraction = Date.now(); // track last interaction time
+let lastStatInteraction = Date.now();
 
 pet.sprite.src = "/RobotTeddyAi.png";
 pet.sprite.onload = () => console.log('Pet sprite loaded successfully');
@@ -49,6 +50,11 @@ function resizeCanvas() {
 function drawPet() {
   if (pet.sprite.complete && pet.sprite.naturalWidth > 0) {
     ctx.drawImage(pet.sprite, pet.x, pet.y, pet.width, pet.height);
+    if (pet.collisionMsg) {
+      ctx.font = "20px Arial";
+      ctx.fillStyle = "black";
+      ctx.fillText(pet.collisionMsg, pet.x + pet.width + 10, pet.y + 20);
+    }
   } else {
     ctx.fillStyle = "red";
     ctx.fillRect(pet.x, pet.y, pet.width, pet.height);
@@ -56,11 +62,9 @@ function drawPet() {
 }
 
 function updateStats() {
-  // Decrease stats by 0.02 each frame
   for (let key in pet.stats) {
     pet.stats[key] = Math.max(0, pet.stats[key] - 0.02);
     if (pet.stats[key] === 0) {
-      // Trigger pet to move to a stat-related button
       pet.isRoaming = false;
       pet.targetStat = key;
       movePetTo(`${key}StatButton`);
@@ -115,7 +119,7 @@ function checkGameConditions() {
 }
 
 function movePet() {
-  if (pet.isRoaming) {
+  if (pet.isRoaming && !pet.isPaused) {
     pet.x += pet.vx * pet.speedMultiplier;
     pet.y += pet.vy * pet.speedMultiplier;
 
@@ -156,17 +160,14 @@ function handleStatInteraction(stat) {
     return;
   }
 
-  // Increase stat and apply cooldown
   pet.stats[stat] = Math.min(100, pet.stats[stat] + 25);
-  statCooldowns[stat] = 10; // 10 seconds cooldown
+  statCooldowns[stat] = 10;
   lastStatInteraction = Date.now();
 
-  // Increase health if stat is full
   if (pet.stats[stat] === 100) {
     globalHealth = Math.min(100, globalHealth + 5);
   }
 
-  // Reset to roaming state if all stats are above 1%
   if (Object.values(pet.stats).every(value => value > 0)) {
     pet.isRoaming = true;
     pet.targetStat = null;
@@ -174,7 +175,6 @@ function handleStatInteraction(stat) {
 }
 
 function updateCooldowns() {
-  // Update cooldowns every second
   const now = Date.now();
   for (let stat in statCooldowns) {
     if (statCooldowns[stat] > 0) {
@@ -182,47 +182,44 @@ function updateCooldowns() {
     }
   }
 
-  // Health decrease logic for low stats
   for (let key in pet.stats) {
     if (pet.stats[key] === 0) {
       globalHealth = Math.max(0, globalHealth - 5);
     }
   }
 
-  // Global health increase logic
   if (Object.values(pet.stats).every(value => value > 75)) {
     globalHealth = Math.min(100, globalHealth + 10);
   }
 }
 
 function petCollisionWithStatObject(stat) {
-  if (pet.stats[stat] > 0) {
-    // Decrease stat by 15% on collision
+  const emojis = {
+    eat: "(^* _ *^)",
+    sleep: "(^~ _ ~^)",
+    wash: "(^x _ x^)",
+    play: "(^O _ O^)"
+  };
+
+  if (pet.stats[stat] > 0 && !pet.isPaused) {
     pet.stats[stat] = Math.max(0, pet.stats[stat] - 15);
-    
-    // Pet changes path away from stat object
-    pet.isRoaming = true; // Reset pet to roaming state
-    
-    // Pause pet movement and trigger cooldown message for 3 seconds
+    pet.isRoaming = false;
     pet.isPaused = true;
-    pet.pauseDuration = 0;
-    alert(`${stat.charAt(0).toUpperCase() + stat.slice(1)} collision! Reducing stat and taking a pause.`);
+    pet.collisionMsg = emojis[stat];
     setTimeout(() => {
       pet.isPaused = false;
+      pet.isRoaming = true;
+      pet.collisionMsg = null;
+      pet.vx *= -1;
+      pet.vy *= -1;
     }, 3000);
   }
 }
 
 function gameLoop() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  
-  // Pause pet if in paused state
-  if (pet.isPaused) {
-    pet.pauseDuration++;
-    if (pet.pauseDuration > 3) pet.isPaused = false; // Reset after 3 seconds pause
-  } else {
-    movePet();
-  }
+
+  if (!pet.isPaused) movePet();
 
   updateStats();
   drawPet();
@@ -234,6 +231,7 @@ function gameLoop() {
   buttons.forEach(btn => {
     if (isCollidingWithButton(btn)) {
       const stat = btn.replace("btn", "").toLowerCase();
+      petCollisionWithStatObject(stat);
       handleStatInteraction(stat);
     }
   });
