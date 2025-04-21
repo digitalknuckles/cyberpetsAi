@@ -227,14 +227,23 @@ function gameLoop() {
   checkGameConditions();
   updateCooldowns();
 
-  const buttons = ["btnEat", "btnSleep", "btnWash", "btnPlay"];
-  buttons.forEach(btn => {
-    if (isCollidingWithButton(btn)) {
-      const stat = btn.replace("btn", "").toLowerCase();
-      petCollisionWithStatObject(stat);
-      handleStatInteraction(stat);
-    }
+const buttons = ["btnEat", "btnSleep", "btnWash", "btnPlay"];
+buttons.forEach(btn => {
+  const stat = btn.replace("btn", "").toLowerCase();
+
+  // Check for player interaction (mouse click only)
+  const buttonElement = document.getElementById(btn);
+  buttonElement.addEventListener("click", () => {
+    handleStatInteraction(stat);
   });
+
+  // Check for pet collision but separate logic
+  if (isCollidingWithButton(btn)) {
+    if (!pet.isPaused) {
+      petCollisionWithStatObject(stat); // trigger stat decrease + pause
+    }
+  }
+});
 
   requestAnimationFrame(gameLoop);
 }
