@@ -4,8 +4,8 @@ const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
 let pet = {
-  x: 150,
-  y: 150,
+  x: 300,
+  y: 300,
   vx: 1.5,
   vy: 1.5,
   width: 80,
