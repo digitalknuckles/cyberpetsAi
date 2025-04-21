@@ -3,19 +3,6 @@ import { mintPrize } from './walletconnect.js';
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
-// 🐾 Prompt user for custom pet name
-const petName = prompt("Name your pet robot teddy:", "Teddy") || "Teddy";
-document.getElementById("petNameDisplay").textContent = `🐻 ${petName}`;
-
-// 🎵 Load sound effects
-const sounds = {
-  eat: new Audio("/sounds/eat.mp3"),
-  sleep: new Audio("/sounds/sleep.mp3"),
-  wash: new Audio("/sounds/wash.mp3"),
-  play: new Audio("/sounds/play.mp3"),
-  victory: new Audio("/sounds/victory.mp3")
-};
-
 let pet = {
   x: 300,
   y: 300,
@@ -35,7 +22,8 @@ let pet = {
   targetStat: null,
   isPaused: false,
   pauseDuration: 0,
-  collisionMsg: null
+  collisionMsg: null,
+  lastStatHandled: null
 };
 
 let globalHealth = 100;
@@ -78,10 +66,11 @@ function drawPet() {
 function updateStats() {
   for (let key in pet.stats) {
     pet.stats[key] = Math.max(0, pet.stats[key] - 0.02);
-    if (pet.stats[key] === 0) {
+    if (pet.stats[key] === 0 && pet.lastStatHandled !== key) {
       pet.isRoaming = false;
       pet.targetStat = key;
       movePetTo(`${key}StatButton`);
+      pet.lastStatHandled = key;
     }
   }
 }
@@ -120,7 +109,6 @@ function checkGameConditions() {
   if (globalHealth >= 100 && !trainingUnlocked) {
     trainingUnlocked = true;
     console.log("Training Unlocked!");
-    document.getElementById("btnTraining").style.display = "inline-block";
   }
 
   if (globalHealth >= 100 && trainingUnlocked && globalTraining >= 100 && !window.victoryAchieved) {
@@ -128,7 +116,6 @@ function checkGameConditions() {
     pet.speedMultiplier = 2;
     setTimeout(() => {
       alert("🎉 Super Star Pet Vibes! 🐾\nMint your prize!");
-      sounds.victory.play();
       mintPrize();
     }, 300);
   }
@@ -187,9 +174,8 @@ function handleStatInteraction(stat) {
   if (Object.values(pet.stats).every(value => value > 0)) {
     pet.isRoaming = true;
     pet.targetStat = null;
+    pet.lastStatHandled = null;
   }
-
-  if (sounds[stat]) sounds[stat].play();
 }
 
 function updateCooldowns() {
@@ -234,6 +220,17 @@ function petCollisionWithStatObject(stat) {
   }
 }
 
+function attachButtonHandlers(btnId, stat) {
+  const button = document.getElementById(btnId);
+  if (!button) return;
+
+  button.addEventListener("click", () => handleStatInteraction(stat));
+  button.addEventListener("touchstart", (e) => {
+    e.preventDefault();
+    handleStatInteraction(stat);
+  });
+}
+
 function gameLoop() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -248,10 +245,6 @@ function gameLoop() {
   const buttons = ["btnEat", "btnSleep", "btnWash", "btnPlay"];
   buttons.forEach(btn => {
     const stat = btn.replace("btn", "").toLowerCase();
-
-    const buttonElement = document.getElementById(btn);
-    buttonElement.addEventListener("click", () => handleStatInteraction(stat));
-
     if (isCollidingWithButton(btn)) {
       if (!pet.isPaused) {
         petCollisionWithStatObject(stat);
@@ -262,28 +255,13 @@ function gameLoop() {
   requestAnimationFrame(gameLoop);
 }
 
-// 📌 Button event listeners
-["eat", "sleep", "wash", "play"].forEach(stat => {
-  document.getElementById(`btn${stat.charAt(0).toUpperCase() + stat.slice(1)}`)
-    .addEventListener("click", () => handleStatInteraction(stat));
-});
-
-// 🧠 Training button
-document.getElementById("btnTraining").addEventListener("click", () => {
-  alert(`${petName} is ready to train!`);
-  globalTraining = Math.min(100, globalTraining + 25);
-});
-
-// 🟡 Toggle roaming behavior
-document.getElementById("btnPauseRoaming").addEventListener("click", () => {
-  pet.isRoaming = !pet.isRoaming;
-  document.getElementById("btnPauseRoaming").textContent = pet.isRoaming ? "Pause Roaming" : "Resume Roaming";
-});
-
-// 🚀 Game startup
 window.addEventListener("load", () => {
   resizeCanvas();
   console.log("Canvas:", canvas.width, canvas.height);
   console.log("Pet Position:", pet.x, pet.y);
+  ["btnEat", "btnSleep", "btnWash", "btnPlay"].forEach(btnId => {
+    const stat = btnId.replace("btn", "").toLowerCase();
+    attachButtonHandlers(btnId, stat);
+  });
   gameLoop();
 });
