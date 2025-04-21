@@ -22,7 +22,8 @@ let pet = {
   targetStat: null,
   isPaused: false,
   pauseDuration: 0,
-  collisionMsg: null
+  collisionMsg: null,
+  lastStatHandled: null
 };
 
 let globalHealth = 100;
@@ -64,10 +65,11 @@ function drawPet() {
 function updateStats() {
   for (let key in pet.stats) {
     pet.stats[key] = Math.max(0, pet.stats[key] - 0.02);
-    if (pet.stats[key] === 0) {
+    if (pet.stats[key] === 0 && pet.lastStatHandled !== key) {
       pet.isRoaming = false;
       pet.targetStat = key;
       movePetTo(`${key}StatButton`);
+      pet.lastStatHandled = key;
     }
   }
 }
@@ -171,6 +173,7 @@ function handleStatInteraction(stat) {
   if (Object.values(pet.stats).every(value => value > 0)) {
     pet.isRoaming = true;
     pet.targetStat = null;
+    pet.lastStatHandled = null;
   }
 }
 
@@ -227,23 +230,18 @@ function gameLoop() {
   checkGameConditions();
   updateCooldowns();
 
-const buttons = ["btnEat", "btnSleep", "btnWash", "btnPlay"];
-buttons.forEach(btn => {
-  const stat = btn.replace("btn", "").toLowerCase();
+  const buttons = ["btnEat", "btnSleep", "btnWash", "btnPlay"];
+  buttons.forEach(btn => {
+    const stat = btn.replace("btn", "").toLowerCase();
+    const buttonElement = document.getElementById(btn);
+    buttonElement.onclick = () => handleStatInteraction(stat);
 
-  // Check for player interaction (mouse click only)
-  const buttonElement = document.getElementById(btn);
-  buttonElement.addEventListener("click", () => {
-    handleStatInteraction(stat);
-  });
-
-  // Check for pet collision but separate logic
-  if (isCollidingWithButton(btn)) {
-    if (!pet.isPaused) {
-      petCollisionWithStatObject(stat); // trigger stat decrease + pause
+    if (isCollidingWithButton(btn)) {
+      if (!pet.isPaused) {
+        petCollisionWithStatObject(stat);
+      }
     }
-  }
-});
+  });
 
   requestAnimationFrame(gameLoop);
 }
