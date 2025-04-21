@@ -212,7 +212,7 @@ function petCollisionWithStatObject(stat) {
       pet.collisionMsg = null;
       pet.vx *= -1;
       pet.vy *= -1;
-    }, 1000);
+    }, 500);
   }
 }
 
