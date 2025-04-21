@@ -85,6 +85,18 @@ function drawHUD() {
       else if (pet.stats[key] < 50) bar.className = "status-bar red";
       else bar.className = "status-bar green";
     }
+
+    // Update cooldown visual
+    const btn = document.getElementById(`btn${capitalize(key)}`);
+    if (btn) {
+      if (statCooldowns[key] > 0) {
+        btn.disabled = true;
+        btn.textContent = `${capitalize(key)} (${Math.ceil(statCooldowns[key])})`;
+      } else {
+        btn.disabled = false;
+        btn.textContent = `${capitalize(key)}`;
+      }
+    }
   });
 
   const hpBar = document.getElementById("globalHealthBar");
@@ -159,7 +171,11 @@ function movePetTo(buttonId) {
 
 function handleStatInteraction(stat) {
   if (statCooldowns[stat] > 0) {
-    alert(`You must wait before interacting with ${stat}.`);
+    const btn = document.getElementById(`btn${capitalize(stat)}`);
+    if (btn) {
+      btn.textContent = `Wait...`;
+      setTimeout(() => btn.textContent = capitalize(stat), 1000);
+    }
     return;
   }
 
@@ -176,13 +192,22 @@ function handleStatInteraction(stat) {
     pet.targetStat = null;
     pet.lastStatHandled = null;
   }
+
+  const btn = document.getElementById(`btn${capitalize(stat)}`);
+  if (btn) {
+    btn.textContent = `+25!`;
+    setTimeout(() => {
+      btn.textContent = capitalize(stat);
+    }, 1000);
+  }
 }
 
 function updateCooldowns() {
   const now = Date.now();
+  const delta = (now - lastStatInteraction) / 1000;
   for (let stat in statCooldowns) {
     if (statCooldowns[stat] > 0) {
-      statCooldowns[stat] = Math.max(0, statCooldowns[stat] - (now - lastStatInteraction) / 1000);
+      statCooldowns[stat] = Math.max(0, statCooldowns[stat] - delta);
     }
   }
 
@@ -231,6 +256,10 @@ function attachButtonHandlers(btnId, stat) {
   });
 }
 
+function capitalize(str) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
 function gameLoop() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -263,5 +292,8 @@ window.addEventListener("load", () => {
     const stat = btnId.replace("btn", "").toLowerCase();
     attachButtonHandlers(btnId, stat);
   });
+  gameLoop();
+});
+
   gameLoop();
 });
