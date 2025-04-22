@@ -214,7 +214,7 @@ function movePet() {
     pet.roamSteps++;
     if (pet.roamSteps >= pet.roamPauseCooldown) {
       pet.isPaused = true;
-      pet.pauseDuration = getRandomInt(120, 300); // Pause 2-5 seconds
+      pet.pauseDuration = getRandomInt(1000, 1500); // Pause 2-5 seconds
     }
   }
 }
@@ -366,8 +366,13 @@ function updatePetRoaming() {
 
     if (pet.pauseDuration <= 0) {
       pet.isPaused = false;
-      pet.roamSteps = 0; // Reset roam steps so it can roam again
-      pet.roamPauseCooldown = getRandomInt(7, 15); // New pause cooldown
+      pet.roamSteps = 0;
+      pet.roamPauseCooldown = getRandomInt(30, 60); // Extend or randomize as you wish
+
+      // 👉 Set a new random direction after pause
+      const angle = Math.random() * Math.PI * 2;
+      pet.vx = Math.cos(angle) * 1.5; // Adjust speed as needed
+      pet.vy = Math.sin(angle) * 1.5;
     }
   }
 }
