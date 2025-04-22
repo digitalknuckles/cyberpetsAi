@@ -178,13 +178,29 @@ function checkGameConditions() {
   }
 }
 
-function movePet() {
-  if (pet.isRoaming && !pet.isPaused) {
-    pet.x += pet.vx * pet.speedMultiplier;
-    pet.y += pet.vy * pet.speedMultiplier;
+function handleRoamingPause() {
+  if (!pet.pauseEndTime && pet.isRoaming) {
+    pet.isPaused = true;
+    const pauseTime = Math.random() * 3000 + 1000; // between 1000ms and 4000ms
+    pet.pauseEndTime = Date.now() + pauseTime;
+  }
 
-    if (pet.x <= 0 || pet.x + pet.width >= canvas.width) pet.vx *= -1;
-    if (pet.y <= 0 || pet.y + pet.height >= canvas.height) pet.vy *= -1;
+  if (pet.isPaused && Date.now() >= pet.pauseEndTime) {
+    pet.isPaused = false;
+    pet.pauseEndTime = null;
+  }
+}
+
+function movePet() {
+  if (pet.isRoaming) {
+    handleRoamingPause();
+    if (!pet.isPaused) {
+      pet.x += pet.vx * pet.speedMultiplier;
+      pet.y += pet.vy * pet.speedMultiplier;
+
+      if (pet.x <= 0 || pet.x + pet.width >= canvas.width) pet.vx *= -1;
+      if (pet.y <= 0 || pet.y + pet.height >= canvas.height) pet.vy *= -1;
+    }
   }
 }
 
