@@ -4,7 +4,7 @@ const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
 let pet = {
-  x: 100,
+  x: 50,
   y: 150,
   vx: 1.5,
   vy: 1.5,
