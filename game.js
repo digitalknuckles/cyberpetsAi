@@ -299,7 +299,7 @@ function updateCooldowns() {
   const allHigh = statsValues.every(value => value >= 90);
 
   if (allHigh) {
-    globalHealth = Math.min(100, globalHealth + 0.1);
+    globalHealth = Math.min(100, globalHealth + 0.05);
   }
 }
 
@@ -312,7 +312,7 @@ function petCollisionWithStatObject(stat) {
   };
 
   if (pet.stats[stat] > 0 && !pet.isPaused) {
-    pet.stats[stat] = Math.max(0, pet.stats[stat] - 15);
+    pet.stats[stat] = Math.max(0, pet.stats[stat] - 5);
     pet.isRoaming = false;
     pet.isPaused = true;
     pet.collisionMsg = emojis[stat];
@@ -348,12 +348,12 @@ function attachButtonHandlers(btnId, stat) {
 function updateGlobalHealth() {
   const statsValues = Object.values(pet.stats);
   const allHigh = statsValues.every(value => value >= 90);
-  const anyLow = statsValues.some(value => value <= 25);
+  const anyLow = statsValues.some(value => value <= 15);
 
   if (allHigh) {
     globalHealth = Math.min(100, globalHealth + 0.15);
   } else if (anyLow) {
-    globalHealth = Math.max(0, globalHealth - 0.2); // <- More punishing
+    globalHealth = Math.max(0, globalHealth - 0.15); // <- More punishing
   }
 }
 
