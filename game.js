@@ -25,7 +25,7 @@ let pet = {
   collisionMsg: null,
   lastStatHandled: null,
   roamSteps: 0,
-  roamPauseCooldown: getRandomInt(7, 15),
+  roamPauseCooldown: getRandomInt(7, 15)
 };
 //let roamSteps = 0;
 //let roamPauseCooldown = getRandomInt(7, 15)
@@ -202,28 +202,25 @@ function handleRoamingPause() {
 }
 
 function movePet() {
-  if (pet.isRoaming) {
-    handleRoamingPause();
+  if (pet.isRoaming && !pet.isPaused) {
+    pet.x += pet.vx * pet.speedMultiplier;
+    pet.y += pet.vy * pet.speedMultiplier;
 
-    if (!pet.isPaused) {
-      pet.x += pet.vx * pet.speedMultiplier;
-      pet.y += pet.vy * pet.speedMultiplier;
+    // Edge bounce
+    if (pet.x <= 0 || pet.x + pet.width >= canvas.width) pet.vx *= -1;
+    if (pet.y <= 0 || pet.y + pet.height >= canvas.height) pet.vy *= -1;
 
-      // Edge bounce
-      if (pet.x <= 0 || pet.x + pet.width >= canvas.width) pet.vx *= -1;
-      if (pet.y <= 0 || pet.y + pet.height >= canvas.height) pet.vy *= -1;
-
-      // Count this as a roaming step
-      pet.roamSteps++;
-      if (pet.roamSteps >= pet.roamPauseCooldown) {
-        pet.isPaused = true;
-        pet.pauseDuration = getRandomInt(120, 300); // 2–5 seconds
-        pet.roamSteps = 0; // Reset steps for next roam cycle
-        pet.roamPauseCooldown = getRandomInt(7, 15); // Optional: reset cooldown too
-      }
+    // Count this as a roaming step
+    pet.roamSteps++;
+    if (pet.roamSteps >= pet.roamPauseCooldown) {
+      pet.isPaused = true;
+      pet.pauseDuration = getRandomInt(120, 300); // Pause 2-5 seconds
     }
   }
 }
+
+updatePetRoaming();
+movePet();
 
 function isCollidingWithButton(btnId) {
   const btn = document.getElementById(btnId);
@@ -360,5 +357,16 @@ function gameLoop() {
   drawHUD();
   checkGameConditions();
   requestAnimationFrame(gameLoop);
+  function updatePetRoaming() {
+  if (pet.isPaused) {
+    pet.pauseDuration--;
+
+    if (pet.pauseDuration <= 0) {
+      pet.isPaused = false;
+      pet.roamSteps = 0; // Reset roam steps so it can roam again
+      pet.roamPauseCooldown = getRandomInt(7, 15); // Optional: reset cooldown for variety
+    }
+  }
+}
 }
 gameLoop();
