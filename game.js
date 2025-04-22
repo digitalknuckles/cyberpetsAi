@@ -296,7 +296,7 @@ function updateCooldowns() {
   }
 
   const statsValues = Object.values(pet.stats);
-  const allHigh = statsValues.every(value => value >= 80);
+  const allHigh = statsValues.every(value => value >= 70);
 
   if (allHigh) {
     globalHealth = Math.min(100, globalHealth + 0.15);
@@ -346,13 +346,14 @@ function attachButtonHandlers(btnId, stat) {
 
 //Global health update
 function updateGlobalHealth() {
-  const totalStats = Object.values(pet.stats).reduce((sum, val) => sum + val, 0);
-  const avgStat = totalStats / Object.keys(pet.stats).length;
+  const statsValues = Object.values(pet.stats);
+  const allHigh = statsValues.every(value => value >= 80);
+  const anyLow = statsValues.some(value => value <= 25);
 
-  // Example: Increase difficulty by making health drop faster below 50%
-  if (avgStat < 100) {
-    const decayRate = (100 - avgStat) * 0.0005; // Increase this number for more difficulty
-    globalHealth = Math.max(0, globalHealth - decayRate);
+  if (allHigh) {
+    globalHealth = Math.min(100, globalHealth + 0.15);
+  } else if (anyLow) {
+    globalHealth = Math.max(0, globalHealth - 0.25); // <- More punishing
   }
 }
 
