@@ -1,4 +1,4 @@
-import { mintPrize } from './walletconnect.js'; 
+import { mintPrize } from './walletconnect.js';
 
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
@@ -110,8 +110,6 @@ function drawHUD() {
 }
 
 function showGameOverScreen() {
-  if (document.getElementById("gameOverOverlay")) return;
-
   const overlay = document.createElement('div');
   overlay.id = "gameOverOverlay";
   overlay.style.position = "fixed";
@@ -155,7 +153,9 @@ function checkGameConditions() {
   const allZero = values.every((v) => v <= 1);
 
   if (allZero) {
-    showGameOverScreen();
+    if (!document.getElementById("gameOverOverlay")) {
+      showGameOverScreen();
+    }
     return;
   }
 
@@ -249,7 +249,9 @@ function handleStatInteraction(stat) {
 
 function updateCooldowns() {
   const now = Date.now();
-  const delta = (now - lastStatInteraction) / 10000;
+  const delta = (now - lastStatInteraction) / 1000;
+  lastStatInteraction = now;
+
   for (let stat in statCooldowns) {
     if (statCooldowns[stat] > 0) {
       statCooldowns[stat] = Math.max(0, statCooldowns[stat] - delta);
@@ -297,11 +299,29 @@ function attachButtonHandlers(btnId, stat) {
   const button = document.getElementById(btnId);
   if (!button) return;
 
-  const touchHandler = (e) => {
-    e.preventDefault();
-    handleStatInteraction(stat);
-  };
+  const trigger = () => handleStatInteraction(stat);
 
-  button.addEventListener("click", () => handleStatInteraction(stat));
-  button.addEventListener("touchstart", touchHandler, { passive: false });
+  button.addEventListener("click", trigger);
+  button.addEventListener("touchstart", (e) => {
+    e.preventDefault();
+    trigger();
+  }, { passive: false });
 }
+
+// Attach handlers
+["eat", "sleep", "wash", "play"].forEach(stat => {
+  attachButtonHandlers(`btn${capitalize(stat)}`, stat);
+});
+
+// Main game loop
+function gameLoop() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  movePet();
+  updateStats();
+  updateCooldowns();
+  drawPet();
+  drawHUD();
+  checkGameConditions();
+  requestAnimationFrame(gameLoop);
+}
+gameLoop();
