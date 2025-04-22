@@ -26,7 +26,7 @@ let pet = {
   lastStatHandled: null
 };
 
-let globalHealth = 100;
+let globalHealth = 10;
 let globalTraining = 0;
 let trainingUnlocked = false;
 
