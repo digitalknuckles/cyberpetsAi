@@ -218,7 +218,6 @@ function checkGameConditions() {
       pet.roamPauseDuration = 0;
       chooseNewRoamTarget();
     }
-    return;
   }
 
   if (!pet.roamTarget) {
