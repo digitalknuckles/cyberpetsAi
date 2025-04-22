@@ -299,7 +299,7 @@ function updateCooldowns() {
   const allHigh = statsValues.every(value => value >= 80);
 
   if (allHigh) {
-    globalHealth = Math.min(100, globalHealth + 0.15);
+    globalHealth = Math.min(100, globalHealth + 0.1);
   }
 }
 
@@ -312,7 +312,7 @@ function petCollisionWithStatObject(stat) {
   };
 
   if (pet.stats[stat] > 0 && !pet.isPaused) {
-    pet.stats[stat] = Math.max(0, pet.stats[stat] - 15);
+    pet.stats[stat] = Math.max(0, pet.stats[stat] - 20);
     pet.isRoaming = false;
     pet.isPaused = true;
     pet.collisionMsg = emojis[stat];
