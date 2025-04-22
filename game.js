@@ -296,7 +296,7 @@ function updateCooldowns() {
   }
 
   const statsValues = Object.values(pet.stats);
-  const allHigh = statsValues.every(value => value >= 90);
+  const allHigh = statsValues.every(value => value >= 80);
 
   if (allHigh) {
     globalHealth = Math.min(100, globalHealth + 0.05);
@@ -347,8 +347,8 @@ function attachButtonHandlers(btnId, stat) {
 //Global health update
 function updateGlobalHealth() {
   const statsValues = Object.values(pet.stats);
-  const allHigh = statsValues.every(value => value >= 90);
-  const anyLow = statsValues.some(value => value <= 15);
+  const allHigh = statsValues.every(value => value >= 75);
+  const anyLow = statsValues.some(value => value <= 25);
 
   if (allHigh) {
     globalHealth = Math.min(100, globalHealth + 0.15);
