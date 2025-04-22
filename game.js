@@ -106,7 +106,7 @@ function drawHUD() {
   if (trainingBar) trainingBar.style.width = `${globalTraining}%`;
 
   const critical = document.getElementById("criticalWarning");
-  if (critical) critical.style.display = globalHealth < 5 ? "block" : "none";
+  if (critical) critical.style.display = globalHealth < 1 ? "block" : "none";
 }
 
 function showGameOverScreen() {
