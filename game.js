@@ -183,7 +183,7 @@ function handleStatInteraction(stat) {
   }
 
   pet.stats[stat] = Math.min(100, pet.stats[stat] + 25);
-  statCooldowns[stat] = 10;
+  statCooldowns[stat] = 100;
   lastStatInteraction = Date.now();
 
   if (Object.values(pet.stats).every(value => value > 0)) {
@@ -197,13 +197,13 @@ function handleStatInteraction(stat) {
     btn.textContent = `+25!`;
     setTimeout(() => {
       btn.textContent = capitalize(stat);
-    }, 1000);
+    }, 10000);
   }
 }
 
 function updateCooldowns() {
   const now = Date.now();
-  const delta = (now - lastStatInteraction) / 1000;
+  const delta = (now - lastStatInteraction) / 10000;
   for (let stat in statCooldowns) {
     if (statCooldowns[stat] > 0) {
       statCooldowns[stat] = Math.max(0, statCooldowns[stat] - delta);
