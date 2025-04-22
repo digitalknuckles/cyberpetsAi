@@ -76,7 +76,7 @@ function drawPet() {
 
 function updateStats() {
   for (let key in pet.stats) {
-    pet.stats[key] = Math.max(0, pet.stats[key] - 0.02);
+    pet.stats[key] = Math.max(0, pet.stats[key] - 0.1);
     if (pet.stats[key] === 0 && pet.lastStatHandled !== key) {
       pet.isRoaming = false;
       pet.targetStat = key;
@@ -116,7 +116,7 @@ function drawHUD() {
   if (trainingBar) trainingBar.style.width = `${globalTraining}%`;
 
   const critical = document.getElementById("criticalWarning");
-  if (critical) critical.style.display = globalHealth < 15 ? "block" : "none";
+  if (critical) critical.style.display = globalHealth < 10 ? "block" : "none";
 }
 
 function showGameOverScreen() {
@@ -137,7 +137,7 @@ function showGameOverScreen() {
   overlay.style.zIndex = 9999;
 
   const msg = document.createElement('div');
-  msg.textContent = "💀 Game Over: Your pet has disappeared 💔";
+  msg.textContent = "💀 Game Over: Your pet has Vanished 💔";
   msg.style.marginBottom = "30px";
 
   const resetBtn = document.createElement('button');
@@ -259,8 +259,8 @@ function handleStatInteraction(stat) {
     return;
   }
 
-  pet.stats[stat] = Math.min(100, pet.stats[stat] + 25);
-  statCooldowns[stat] = 100;
+  pet.stats[stat] = Math.min(100, pet.stats[stat] + 50);
+  statCooldowns[stat] = 10;
   lastStatInteraction = Date.now();
 
   if (Object.values(pet.stats).every(value => value > 0)) {
@@ -271,10 +271,10 @@ function handleStatInteraction(stat) {
 
   const btn = document.getElementById(`btn${capitalize(stat)}`);
   if (btn) {
-    btn.textContent = `+25!`;
+    btn.textContent = `+50!`;
     setTimeout(() => {
       btn.textContent = capitalize(stat);
-    }, 10000);
+    }, 5000);
   }
 }
 
@@ -299,7 +299,7 @@ function updateCooldowns() {
   const allHigh = statsValues.every(value => value >= 80);
 
   if (allHigh) {
-    globalHealth = Math.min(100, globalHealth + 0.15);
+    globalHealth = Math.min(100, globalHealth + 0.05);
   }
 }
 
@@ -312,7 +312,7 @@ function petCollisionWithStatObject(stat) {
   };
 
   if (pet.stats[stat] > 0 && !pet.isPaused) {
-    pet.stats[stat] = Math.max(0, pet.stats[stat] - 15);
+    pet.stats[stat] = Math.max(0, pet.stats[stat] - 5);
     pet.isRoaming = false;
     pet.isPaused = true;
     pet.collisionMsg = emojis[stat];
@@ -344,6 +344,19 @@ function attachButtonHandlers(btnId, stat) {
   attachButtonHandlers(`btn${capitalize(stat)}`, stat);
 });
 
+//Global health update
+function updateGlobalHealth() {
+  const statsValues = Object.values(pet.stats);
+  const allHigh = statsValues.every(value => value >= 50);
+  const anyLow = statsValues.some(value => value <= 50);
+
+  if (allHigh) {
+    globalHealth = Math.min(100, globalHealth + 0.10);
+  } else if (anyLow) {
+    globalHealth = Math.max(0, globalHealth - 0.15); // <- More punishing
+  }
+}
+
 // Main game loop
 function gameLoop() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -351,6 +364,7 @@ function gameLoop() {
   updatePetRoaming();
   movePet(); // Only call once
   updateStats();
+  updateGlobalHealth(); 
   updateCooldowns();
   drawPet();
   drawHUD();
