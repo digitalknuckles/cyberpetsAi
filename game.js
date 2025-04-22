@@ -53,6 +53,34 @@ pet.sprite.src = "./RobotTeddyAi.png";
 pet.sprite.onload = () => console.log('Pet sprite loaded successfully');
 pet.sprite.onerror = () => console.error('Failed to load pet sprite image');
 
+const backgroundImage = new Image();
+backgroundImage.src = "./background.png"; // Update path if different
+
+const startMenuImage = new Image();
+startMenuImage.src = "./startMenu.png"; // Update path if different
+
+let showStartMenu = true; // Start menu initially shown
+
+// Keyboard support
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && showStartMenu) {
+    showStartMenu = false;
+  }
+});
+
+// Touch or click support for mobile and desktop
+document.addEventListener("touchstart", (e) => {
+  if (showStartMenu) {
+    showStartMenu = false;
+  }
+});
+
+document.addEventListener("click", (e) => {
+  if (showStartMenu) {
+    showStartMenu = false;
+  }
+});
+
 function resizeCanvas() {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
@@ -357,9 +385,18 @@ function updateGlobalHealth() {
   }
 }
 
+
 // Main game loop
 function gameLoop() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    if (!gameStarted) {
+    drawStartMenu();       
+    requestAnimationFrame(gameLoop);
+    return;                
+  }
+
+  drawBackground(); 
   
   updatePetRoaming();
   movePet(); // Only call once
