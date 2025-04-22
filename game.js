@@ -200,9 +200,6 @@ function checkGameConditions() {
   }
 }
 
-function movePet() {
-  if (pet.isPaused) return;
-
   if (!pet.isRoaming && pet.targetStat) {
     const btn = document.getElementById(`${pet.targetStat}StatButton`);
     if (btn) {
