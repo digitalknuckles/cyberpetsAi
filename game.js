@@ -76,7 +76,7 @@ function drawPet() {
 
 function updateStats() {
   for (let key in pet.stats) {
-    pet.stats[key] = Math.max(0, pet.stats[key] - 0.02);
+    pet.stats[key] = Math.max(0, pet.stats[key] - 0.1);
     if (pet.stats[key] === 0 && pet.lastStatHandled !== key) {
       pet.isRoaming = false;
       pet.targetStat = key;
