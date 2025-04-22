@@ -23,10 +23,7 @@ let pet = {
   isPaused: false,
   pauseDuration: 0,
   collisionMsg: null,
-  lastStatHandled: null,
-  roamTarget: null,
-  roamPauseDuration: 0,
-  roamPauseTimer: 0
+  lastStatHandled: null
 };
 
 let globalHealth = 100;
@@ -42,25 +39,6 @@ let statCooldowns = {
 
 let lastStatInteraction = Date.now();
 
-function moveTowardTarget(targetX, targetY, speed = 2) {
-  const dx = targetX - pet.x;
-  const dy = targetY - pet.y;
-  const dist = Math.sqrt(dx * dx + dy * dy);
-  if (dist > 1) {
-    pet.vx = (dx / dist) * speed;
-    pet.vy = (dy / dist) * speed;
-    pet.x += pet.vx;
-    pet.y += pet.vy;
-  } else {
-    pet.vx = 0;
-    pet.vy = 0;
-    pet.isPaused = true;
-    setTimeout(() => {
-      pet.isPaused = false;
-    }, 1000);
-  }
-}
-
 pet.sprite.src = "./RobotTeddyAi.png";
 pet.sprite.onload = () => console.log('Pet sprite loaded successfully');
 pet.sprite.onerror = () => console.error('Failed to load pet sprite image');
@@ -70,7 +48,6 @@ function resizeCanvas() {
   canvas.height = window.innerHeight;
 }
 window.addEventListener("resize", resizeCanvas);
-resizeCanvas();
 
 function drawPet() {
   if (pet.sprite.complete && pet.sprite.naturalWidth > 0) {
@@ -131,7 +108,11 @@ function drawHUD() {
   if (critical) critical.style.display = globalHealth < 10 ? "block" : "none";
 }
 
-function showGameOverScreen() {
+function checkGameConditions() {
+  const values = Object.values(pet.stats);
+  const allZero = values.every((v) => v <= 1);
+
+ function showGameOverScreen() {
   const overlay = document.createElement('div');
   overlay.id = "gameOverOverlay";
   overlay.style.position = "fixed";
@@ -201,61 +182,13 @@ function checkGameConditions() {
 }
 
 function movePet() {
-  if (pet.isPaused) return;
+  if (pet.isRoaming && !pet.isPaused) {
+    pet.x += pet.vx * pet.speedMultiplier;
+    pet.y += pet.vy * pet.speedMultiplier;
 
-  if (!pet.isRoaming && pet.targetStat) {
-    const btn = document.getElementById(`${pet.targetStat}StatButton`);
-    if (btn) {
-      const rect = btn.getBoundingClientRect();
-      const canvasRect = canvas.getBoundingClientRect();
-      const targetX = rect.left - canvasRect.left + rect.width / 2 - pet.width / 2;
-      const targetY = rect.top - canvasRect.top + rect.height / 2 - pet.height / 2;
-      moveTowardTarget(targetX, targetY);
-    }
-    return;
+    if (pet.x <= 0 || pet.x + pet.width >= canvas.width) pet.vx *= -1;
+    if (pet.y <= 0 || pet.y + pet.height >= canvas.height) pet.vy *= -1;
   }
-
-  // Roaming logic
-  if (pet.roamPauseDuration > 0) {
-    pet.roamPauseTimer -= 1;
-    if (pet.roamPauseTimer <= 0) {
-      pet.roamPauseDuration = 0;
-      chooseNewRoamTarget();
-    }
-    return;
-  }
-
-  if (!pet.roamTarget) {
-    chooseNewRoamTarget();
-    return;
-  }
-
-  const dx = pet.roamTarget.x - pet.x;
-  const dy = pet.roamTarget.y - pet.y;
-  const distance = Math.sqrt(dx * dx + dy * dy);
-
-  if (distance < 5) {
-    pet.roamPauseDuration = Math.floor(Math.random() * 120) + 60;
-    pet.roamPauseTimer = pet.roamPauseDuration;
-    pet.roamTarget = null;
-    return;
-  }
-
-  const angle = Math.atan2(dy, dx);
-  const speed = 1.5 * pet.speedMultiplier;
-  pet.x += Math.cos(angle) * speed;
-  pet.y += Math.sin(angle) * speed;
-
-  pet.x = Math.max(0, Math.min(canvas.width - pet.width, pet.x));
-  pet.y = Math.max(0, Math.min(canvas.height - pet.height, pet.y));
-}
-
-function chooseNewRoamTarget() {
-  const margin = 50;
-  pet.roamTarget = {
-    x: Math.random() * (canvas.width - margin * 2) + margin,
-    y: Math.random() * (canvas.height - margin * 2) + margin
-  };
 }
 
 function isCollidingWithButton(btnId) {
@@ -273,47 +206,15 @@ function isCollidingWithButton(btnId) {
   );
 }
 
-function movePet() {
-  if (!pet.isRoaming || pet.isPaused) return;
+function movePetTo(buttonId) {
+  const btn = document.getElementById(buttonId);
+  const rect = btn.getBoundingClientRect();
+  const canvasRect = canvas.getBoundingClientRect();
+  const targetX = rect.left - canvasRect.left + rect.width / 2 - pet.width / 2;
+  const targetY = rect.top - canvasRect.top + rect.height / 2 - pet.height / 2;
 
-  // Pause if we're in a waiting state
-  if (pet.roamPauseDuration > 0) {
-    pet.roamPauseTimer -= 1;
-    if (pet.roamPauseTimer <= 0) {
-      pet.roamPauseDuration = 0;
-      chooseNewRoamTarget();
-    }
-    return;
-  }
-
-  if (!pet.roamTarget) {
-    chooseNewRoamTarget();
-    return;
-  }
-
-  const dx = pet.roamTarget.x - pet.x;
-  const dy = pet.roamTarget.y - pet.y;
-  const distance = Math.sqrt(dx * dx + dy * dy);
-
-  if (distance < 5) {
-    pet.roamPauseDuration = Math.floor(Math.random() * 120) + 60; // 1-3 seconds at 60fps
-    pet.roamPauseTimer = pet.roamPauseDuration;
-    pet.roamTarget = null;
-    return;
-  }
-
-  const angle = Math.atan2(dy, dx);
-  const speed = 1.5 * pet.speedMultiplier;
-  pet.x += Math.cos(angle) * speed;
-  pet.y += Math.sin(angle) * speed;
-
-  // Clamp inside canvas
-  pet.x = Math.max(0, Math.min(canvas.width - pet.width, pet.x));
-  pet.y = Math.max(0, Math.min(canvas.height - pet.height, pet.y));
-}
-
-function capitalize(str) {
-  return str.charAt(0).toUpperCase() + str.slice(1);
+  pet.x = targetX;
+  pet.y = targetY;
 }
 
 function handleStatInteraction(stat) {
@@ -329,22 +230,6 @@ function handleStatInteraction(stat) {
   pet.stats[stat] = Math.min(100, pet.stats[stat] + 25);
   statCooldowns[stat] = 100;
   lastStatInteraction = Date.now();
-
-  // Resume roaming if all stats are above 0 again
-  if (Object.values(pet.stats).every(value => value > 0)) {
-    pet.isRoaming = true;
-    pet.targetStat = null;
-    pet.lastStatHandled = null;
-  }
-
-  const btn = document.getElementById(`btn${capitalize(stat)}`);
-  if (btn) {
-    btn.textContent = `+25!`;
-    setTimeout(() => {
-      btn.textContent = capitalize(stat);
-    }, 10000);
-  }
-}
 
   if (Object.values(pet.stats).every(value => value > 0)) {
     pet.isRoaming = true;
@@ -363,9 +248,7 @@ function handleStatInteraction(stat) {
 
 function updateCooldowns() {
   const now = Date.now();
-  const delta = (now - lastStatInteraction) / 1000;
-  lastStatInteraction = now;
-
+  const delta = (now - lastStatInteraction) / 10000;
   for (let stat in statCooldowns) {
     if (statCooldowns[stat] > 0) {
       statCooldowns[stat] = Math.max(0, statCooldowns[stat] - delta);
@@ -380,6 +263,7 @@ function updateCooldowns() {
 
   const statsValues = Object.values(pet.stats);
   const allHigh = statsValues.every(value => value >= 80);
+  const allMax = statsValues.every(value => value === 100);
 
   if (allHigh) {
     globalHealth = Math.min(100, globalHealth + 0.15);
@@ -413,29 +297,49 @@ function attachButtonHandlers(btnId, stat) {
   const button = document.getElementById(btnId);
   if (!button) return;
 
-  const trigger = () => handleStatInteraction(stat);
-
-  button.addEventListener("click", trigger);
+  button.addEventListener("click", () => handleStatInteraction(stat));
   button.addEventListener("touchstart", (e) => {
     e.preventDefault();
-    trigger();
-  }, { passive: false });
+    handleStatInteraction(stat);
+  });
 }
 
-// Attach handlers
-["eat", "sleep", "wash", "play"].forEach(stat => {
-  attachButtonHandlers(`btn${capitalize(stat)}`, stat);
-});
+function capitalize(str) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
 
-// Main game loop
 function gameLoop() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  movePet();
+
+  if (!pet.isPaused) movePet();
+
   updateStats();
-  updateCooldowns();
   drawPet();
   drawHUD();
   checkGameConditions();
+  updateCooldowns();
+
+  const buttons = ["btnEat", "btnSleep", "btnWash", "btnPlay"];
+  buttons.forEach(btn => {
+    const stat = btn.replace("btn", "").toLowerCase();
+    if (isCollidingWithButton(btn)) {
+      if (!pet.isPaused) {
+        petCollisionWithStatObject(stat);
+      }
+    }
+  });
+
   requestAnimationFrame(gameLoop);
 }
-gameLoop();
+
+window.addEventListener("load", () => {
+  resizeCanvas();
+  console.log("Canvas:", canvas.width, canvas.height);
+  console.log("Pet Position:", pet.x, pet.y);
+  ["btnEat", "btnSleep", "btnWash", "btnPlay"].forEach(btnId => {
+    const stat = btnId.replace("btn", "").toLowerCase();
+    attachButtonHandlers(btnId, stat);
+  });
+  gameLoop();
+});
+}
