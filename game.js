@@ -76,7 +76,7 @@ function drawPet() {
 
 function updateStats() {
   for (let key in pet.stats) {
-    pet.stats[key] = Math.max(0, pet.stats[key] - 0.07);
+    pet.stats[key] = Math.max(0, pet.stats[key] - 0.1);
     if (pet.stats[key] === 0 && pet.lastStatHandled !== key) {
       pet.isRoaming = false;
       pet.targetStat = key;
@@ -259,7 +259,7 @@ function handleStatInteraction(stat) {
     return;
   }
 
-  pet.stats[stat] = Math.min(100, pet.stats[stat] + 25);
+  pet.stats[stat] = Math.min(100, pet.stats[stat] + 50);
   statCooldowns[stat] = 10;
   lastStatInteraction = Date.now();
 
@@ -271,7 +271,7 @@ function handleStatInteraction(stat) {
 
   const btn = document.getElementById(`btn${capitalize(stat)}`);
   if (btn) {
-    btn.textContent = `+25!`;
+    btn.textContent = `+50!`;
     setTimeout(() => {
       btn.textContent = capitalize(stat);
     }, 5000);
@@ -347,11 +347,11 @@ function attachButtonHandlers(btnId, stat) {
 //Global health update
 function updateGlobalHealth() {
   const statsValues = Object.values(pet.stats);
-  const allHigh = statsValues.every(value => value >= 75);
-  const anyLow = statsValues.some(value => value <= 25);
+  const allHigh = statsValues.every(value => value >= 50);
+  const anyLow = statsValues.some(value => value <= 50);
 
   if (allHigh) {
-    globalHealth = Math.min(100, globalHealth + 0.15);
+    globalHealth = Math.min(100, globalHealth + 0.10);
   } else if (anyLow) {
     globalHealth = Math.max(0, globalHealth - 0.15); // <- More punishing
   }
