@@ -39,7 +39,7 @@ let statCooldowns = {
 
 let lastStatInteraction = Date.now();
 
-pet.sprite.src = "/RobotTeddyAi.png";
+pet.sprite.src = "./RobotTeddyAi.png";
 pet.sprite.onload = () => console.log('Pet sprite loaded successfully');
 pet.sprite.onerror = () => console.error('Failed to load pet sprite image');
 
