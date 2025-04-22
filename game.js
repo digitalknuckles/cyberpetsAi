@@ -203,13 +203,7 @@ function checkGameConditions() {
 function movePet() {
   if (pet.isPaused) return;
 
-  if (pet.isRoaming) {
-    pet.x += pet.vx * pet.speedMultiplier;
-    pet.y += pet.vy * pet.speedMultiplier;
-
-    if (pet.x <= 0 || pet.x + pet.width >= canvas.width) pet.vx *= -1;
-    if (pet.y <= 0 || pet.y + pet.height >= canvas.height) pet.vy *= -1;
-  } else if (pet.targetStat) {
+  if (!pet.isRoaming && pet.targetStat) {
     const btn = document.getElementById(`${pet.targetStat}StatButton`);
     if (btn) {
       const rect = btn.getBoundingClientRect();
@@ -218,7 +212,42 @@ function movePet() {
       const targetY = rect.top - canvasRect.top + rect.height / 2 - pet.height / 2;
       moveTowardTarget(targetX, targetY);
     }
+    return;
   }
+
+  // Roaming logic
+  if (pet.roamPauseDuration > 0) {
+    pet.roamPauseTimer -= 1;
+    if (pet.roamPauseTimer <= 0) {
+      pet.roamPauseDuration = 0;
+      chooseNewRoamTarget();
+    }
+    return;
+  }
+
+  if (!pet.roamTarget) {
+    chooseNewRoamTarget();
+    return;
+  }
+
+  const dx = pet.roamTarget.x - pet.x;
+  const dy = pet.roamTarget.y - pet.y;
+  const distance = Math.sqrt(dx * dx + dy * dy);
+
+  if (distance < 5) {
+    pet.roamPauseDuration = Math.floor(Math.random() * 120) + 60;
+    pet.roamPauseTimer = pet.roamPauseDuration;
+    pet.roamTarget = null;
+    return;
+  }
+
+  const angle = Math.atan2(dy, dx);
+  const speed = 1.5 * pet.speedMultiplier;
+  pet.x += Math.cos(angle) * speed;
+  pet.y += Math.sin(angle) * speed;
+
+  pet.x = Math.max(0, Math.min(canvas.width - pet.width, pet.x));
+  pet.y = Math.max(0, Math.min(canvas.height - pet.height, pet.y));
 }
 
 function chooseNewRoamTarget() {
