@@ -241,7 +241,6 @@ function checkGameConditions() {
 
   pet.x = Math.max(0, Math.min(canvas.width - pet.width, pet.x));
   pet.y = Math.max(0, Math.min(canvas.height - pet.height, pet.y));
-}
 
 function chooseNewRoamTarget() {
   const margin = 50;
