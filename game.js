@@ -116,7 +116,7 @@ function drawHUD() {
   if (trainingBar) trainingBar.style.width = `${globalTraining}%`;
 
   const critical = document.getElementById("criticalWarning");
-  if (critical) critical.style.display = globalHealth < 15 ? "block" : "none";
+  if (critical) critical.style.display = globalHealth < 10 ? "block" : "none";
 }
 
 function showGameOverScreen() {
@@ -137,7 +137,7 @@ function showGameOverScreen() {
   overlay.style.zIndex = 9999;
 
   const msg = document.createElement('div');
-  msg.textContent = "💀 Game Over: Your pet has disappeared 💔";
+  msg.textContent = "💀 Game Over: Your pet has Vanished 💔";
   msg.style.marginBottom = "30px";
 
   const resetBtn = document.createElement('button');
@@ -274,7 +274,7 @@ function handleStatInteraction(stat) {
     btn.textContent = `+25!`;
     setTimeout(() => {
       btn.textContent = capitalize(stat);
-    }, 10000);
+    }, 5000);
   }
 }
 
