@@ -48,6 +48,7 @@ function resizeCanvas() {
   canvas.height = window.innerHeight;
 }
 window.addEventListener("resize", resizeCanvas);
+resizeCanvas();
 
 function drawPet() {
   if (pet.sprite.complete && pet.sprite.naturalWidth > 0) {
@@ -108,11 +109,7 @@ function drawHUD() {
   if (critical) critical.style.display = globalHealth < 10 ? "block" : "none";
 }
 
-function checkGameConditions() {
-  const values = Object.values(pet.stats);
-  const allZero = values.every((v) => v <= 1);
-
- function showGameOverScreen() {
+function showGameOverScreen() {
   const overlay = document.createElement('div');
   overlay.id = "gameOverOverlay";
   overlay.style.position = "fixed";
@@ -217,6 +214,10 @@ function movePetTo(buttonId) {
   pet.y = targetY;
 }
 
+function capitalize(str) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
 function handleStatInteraction(stat) {
   if (statCooldowns[stat] > 0) {
     const btn = document.getElementById(`btn${capitalize(stat)}`);
@@ -248,7 +249,9 @@ function handleStatInteraction(stat) {
 
 function updateCooldowns() {
   const now = Date.now();
-  const delta = (now - lastStatInteraction) / 10000;
+  const delta = (now - lastStatInteraction) / 1000;
+  lastStatInteraction = now;
+
   for (let stat in statCooldowns) {
     if (statCooldowns[stat] > 0) {
       statCooldowns[stat] = Math.max(0, statCooldowns[stat] - delta);
@@ -263,7 +266,6 @@ function updateCooldowns() {
 
   const statsValues = Object.values(pet.stats);
   const allHigh = statsValues.every(value => value >= 80);
-  const allMax = statsValues.every(value => value === 100);
 
   if (allHigh) {
     globalHealth = Math.min(100, globalHealth + 0.15);
@@ -297,49 +299,29 @@ function attachButtonHandlers(btnId, stat) {
   const button = document.getElementById(btnId);
   if (!button) return;
 
-  button.addEventListener("click", () => handleStatInteraction(stat));
+  const trigger = () => handleStatInteraction(stat);
+
+  button.addEventListener("click", trigger);
   button.addEventListener("touchstart", (e) => {
     e.preventDefault();
-    handleStatInteraction(stat);
-  });
+    trigger();
+  }, { passive: false });
 }
 
-function capitalize(str) {
-  return str.charAt(0).toUpperCase() + str.slice(1);
-}
+// Attach handlers
+["eat", "sleep", "wash", "play"].forEach(stat => {
+  attachButtonHandlers(`btn${capitalize(stat)}`, stat);
+});
 
+// Main game loop
 function gameLoop() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  if (!pet.isPaused) movePet();
-
+  movePet();
   updateStats();
+  updateCooldowns();
   drawPet();
   drawHUD();
   checkGameConditions();
-  updateCooldowns();
-
-  const buttons = ["btnEat", "btnSleep", "btnWash", "btnPlay"];
-  buttons.forEach(btn => {
-    const stat = btn.replace("btn", "").toLowerCase();
-    if (isCollidingWithButton(btn)) {
-      if (!pet.isPaused) {
-        petCollisionWithStatObject(stat);
-      }
-    }
-  });
-
   requestAnimationFrame(gameLoop);
 }
-
-window.addEventListener("load", () => {
-  resizeCanvas();
-  console.log("Canvas:", canvas.width, canvas.height);
-  console.log("Pet Position:", pet.x, pet.y);
-  ["btnEat", "btnSleep", "btnWash", "btnPlay"].forEach(btnId => {
-    const stat = btnId.replace("btn", "").toLowerCase();
-    attachButtonHandlers(btnId, stat);
-  });
-  gameLoop();
-});
-}
+gameLoop();
