@@ -214,7 +214,7 @@ function movePet() {
     pet.roamSteps++;
     if (pet.roamSteps >= pet.roamPauseCooldown) {
       pet.isPaused = true;
-      pet.pauseDuration = getRandomInt(1000, 1500); // Pause 2-5 seconds
+      pet.pauseDuration = getRandomInt(300, 1500); // Pause 2-5 seconds
     }
   }
 }
