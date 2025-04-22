@@ -39,6 +39,25 @@ let statCooldowns = {
 
 let lastStatInteraction = Date.now();
 
+function moveTowardTarget(targetX, targetY, speed = 2) {
+  const dx = targetX - pet.x;
+  const dy = targetY - pet.y;
+  const dist = Math.sqrt(dx * dx + dy * dy);
+  if (dist > 1) {
+    pet.vx = (dx / dist) * speed;
+    pet.vy = (dy / dist) * speed;
+    pet.x += pet.vx;
+    pet.y += pet.vy;
+  } else {
+    pet.vx = 0;
+    pet.vy = 0;
+    pet.isPaused = true;
+    setTimeout(() => {
+      pet.isPaused = false;
+    }, 1000);
+  }
+}
+
 pet.sprite.src = "./RobotTeddyAi.png";
 pet.sprite.onload = () => console.log('Pet sprite loaded successfully');
 pet.sprite.onerror = () => console.error('Failed to load pet sprite image');
@@ -179,12 +198,23 @@ function checkGameConditions() {
 }
 
 function movePet() {
-  if (pet.isRoaming && !pet.isPaused) {
+  if (pet.isPaused) return;
+
+  if (pet.isRoaming) {
     pet.x += pet.vx * pet.speedMultiplier;
     pet.y += pet.vy * pet.speedMultiplier;
 
     if (pet.x <= 0 || pet.x + pet.width >= canvas.width) pet.vx *= -1;
     if (pet.y <= 0 || pet.y + pet.height >= canvas.height) pet.vy *= -1;
+  } else if (pet.targetStat) {
+    const btn = document.getElementById(`${pet.targetStat}StatButton`);
+    if (btn) {
+      const rect = btn.getBoundingClientRect();
+      const canvasRect = canvas.getBoundingClientRect();
+      const targetX = rect.left - canvasRect.left + rect.width / 2 - pet.width / 2;
+      const targetY = rect.top - canvasRect.top + rect.height / 2 - pet.height / 2;
+      moveTowardTarget(targetX, targetY);
+    }
   }
 }
 
@@ -203,15 +233,43 @@ function isCollidingWithButton(btnId) {
   );
 }
 
-function movePetTo(buttonId) {
-  const btn = document.getElementById(buttonId);
-  const rect = btn.getBoundingClientRect();
-  const canvasRect = canvas.getBoundingClientRect();
-  const targetX = rect.left - canvasRect.left + rect.width / 2 - pet.width / 2;
-  const targetY = rect.top - canvasRect.top + rect.height / 2 - pet.height / 2;
+function movePet() {
+  if (!pet.isRoaming || pet.isPaused) return;
 
-  pet.x = targetX;
-  pet.y = targetY;
+  // Pause if we're in a waiting state
+  if (pet.roamPauseDuration > 0) {
+    pet.roamPauseTimer -= 1;
+    if (pet.roamPauseTimer <= 0) {
+      pet.roamPauseDuration = 0;
+      chooseNewRoamTarget();
+    }
+    return;
+  }
+
+  if (!pet.roamTarget) {
+    chooseNewRoamTarget();
+    return;
+  }
+
+  const dx = pet.roamTarget.x - pet.x;
+  const dy = pet.roamTarget.y - pet.y;
+  const distance = Math.sqrt(dx * dx + dy * dy);
+
+  if (distance < 5) {
+    pet.roamPauseDuration = Math.floor(Math.random() * 120) + 60; // 1-3 seconds at 60fps
+    pet.roamPauseTimer = pet.roamPauseDuration;
+    pet.roamTarget = null;
+    return;
+  }
+
+  const angle = Math.atan2(dy, dx);
+  const speed = 1.5 * pet.speedMultiplier;
+  pet.x += Math.cos(angle) * speed;
+  pet.y += Math.sin(angle) * speed;
+
+  // Clamp inside canvas
+  pet.x = Math.max(0, Math.min(canvas.width - pet.width, pet.x));
+  pet.y = Math.max(0, Math.min(canvas.height - pet.height, pet.y));
 }
 
 function capitalize(str) {
@@ -231,6 +289,22 @@ function handleStatInteraction(stat) {
   pet.stats[stat] = Math.min(100, pet.stats[stat] + 25);
   statCooldowns[stat] = 100;
   lastStatInteraction = Date.now();
+
+  // Resume roaming if all stats are above 0 again
+  if (Object.values(pet.stats).every(value => value > 0)) {
+    pet.isRoaming = true;
+    pet.targetStat = null;
+    pet.lastStatHandled = null;
+  }
+
+  const btn = document.getElementById(`btn${capitalize(stat)}`);
+  if (btn) {
+    btn.textContent = `+25!`;
+    setTimeout(() => {
+      btn.textContent = capitalize(stat);
+    }, 10000);
+  }
+}
 
   if (Object.values(pet.stats).every(value => value > 0)) {
     pet.isRoaming = true;
