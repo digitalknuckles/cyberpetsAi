@@ -8,8 +8,8 @@ let pet = {
   y: 150,
   vx: 1.5,
   vy: 1.5,
-  width: 80,
-  height: 80,
+  width: 160,
+  height: 160,
   speedMultiplier: 1,
   sprite: new Image(),
   stats: {
