@@ -340,6 +340,6 @@ window.addEventListener("load", () => {
     const stat = btnId.replace("btn", "").toLowerCase();
     attachButtonHandlers(btnId, stat);
   });
+}
   gameLoop();
 });
-}
