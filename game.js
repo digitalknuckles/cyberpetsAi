@@ -232,7 +232,6 @@ function checkGameConditions() {
     pet.roamPauseDuration = Math.floor(Math.random() * 120) + 60;
     pet.roamPauseTimer = pet.roamPauseDuration;
     pet.roamTarget = null;
-    return;
   }
 
   const angle = Math.atan2(dy, dx);
