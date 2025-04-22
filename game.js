@@ -76,7 +76,7 @@ function drawPet() {
 
 function updateStats() {
   for (let key in pet.stats) {
-    pet.stats[key] = Math.max(0, pet.stats[key] - 0.1);
+    pet.stats[key] = Math.max(0, pet.stats[key] - 0.07);
     if (pet.stats[key] === 0 && pet.lastStatHandled !== key) {
       pet.isRoaming = false;
       pet.targetStat = key;
@@ -312,7 +312,7 @@ function petCollisionWithStatObject(stat) {
   };
 
   if (pet.stats[stat] > 0 && !pet.isPaused) {
-    pet.stats[stat] = Math.max(0, pet.stats[stat] - 20);
+    pet.stats[stat] = Math.max(0, pet.stats[stat] - 15);
     pet.isRoaming = false;
     pet.isPaused = true;
     pet.collisionMsg = emojis[stat];
