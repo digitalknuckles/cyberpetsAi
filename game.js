@@ -223,7 +223,7 @@ function handleStatInteraction(stat) {
     const btn = document.getElementById(`btn${capitalize(stat)}`);
     if (btn) {
       btn.textContent = `Wait...`;
-      setTimeout(() => btn.textContent = capitalize(stat), 1000);
+      setTimeout(() => btn.textContent = capitalize(stat), 500);
     }
     return;
   }
@@ -249,7 +249,7 @@ function handleStatInteraction(stat) {
 
 function updateCooldowns() {
   const now = Date.now();
-  const delta = (now - lastStatInteraction) / 1000;
+  const delta = (now - lastStatInteraction) / 500;
   lastStatInteraction = now;
 
   for (let stat in statCooldowns) {
