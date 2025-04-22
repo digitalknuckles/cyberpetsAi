@@ -23,7 +23,10 @@ let pet = {
   isPaused: false,
   pauseDuration: 0,
   collisionMsg: null,
-  lastStatHandled: null
+  lastStatHandled: null,
+  roamTarget: null,
+  roamPauseDuration: 0,
+  roamPauseTimer: 0
 };
 
 let globalHealth = 100;
@@ -216,6 +219,14 @@ function movePet() {
       moveTowardTarget(targetX, targetY);
     }
   }
+}
+
+function chooseNewRoamTarget() {
+  const margin = 50;
+  pet.roamTarget = {
+    x: Math.random() * (canvas.width - margin * 2) + margin,
+    y: Math.random() * (canvas.height - margin * 2) + margin
+  };
 }
 
 function isCollidingWithButton(btnId) {
