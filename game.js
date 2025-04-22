@@ -243,7 +243,7 @@ function handleStatInteraction(stat) {
     btn.textContent = `+25!`;
     setTimeout(() => {
       btn.textContent = capitalize(stat);
-    }, 10000);
+    }, 4000);
   }
 }
 
