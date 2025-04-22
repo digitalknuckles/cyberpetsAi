@@ -23,10 +23,10 @@ let pet = {
   isPaused: false,
   pauseDuration: 0,
   collisionMsg: null,
-  lastStatHandled: null
-  
+  lastStatHandled: null,
+  roamSteps: 0
 };
-let roamSteps = 0;
+//let roamSteps = 0;
 let roamPauseCooldown = getRandomInt(7, 15);
 let isRoamingPaused = false;
 let roamingPauseTimer = 0;
