@@ -1,4 +1,4 @@
-import { mintPrize } from './walletconnect.js';
+import { mintPrize } from './walletconnect.js'; 
 
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
@@ -110,6 +110,8 @@ function drawHUD() {
 }
 
 function showGameOverScreen() {
+  if (document.getElementById("gameOverOverlay")) return;
+
   const overlay = document.createElement('div');
   overlay.id = "gameOverOverlay";
   overlay.style.position = "fixed";
@@ -153,9 +155,7 @@ function checkGameConditions() {
   const allZero = values.every((v) => v <= 1);
 
   if (allZero) {
-    if (!document.getElementById("gameOverOverlay")) {
-      showGameOverScreen();
-    }
+    showGameOverScreen();
     return;
   }
 
@@ -264,7 +264,6 @@ function updateCooldowns() {
 
   const statsValues = Object.values(pet.stats);
   const allHigh = statsValues.every(value => value >= 80);
-  const allMax = statsValues.every(value => value === 100);
 
   if (allHigh) {
     globalHealth = Math.min(100, globalHealth + 0.15);
@@ -298,29 +297,11 @@ function attachButtonHandlers(btnId, stat) {
   const button = document.getElementById(btnId);
   if (!button) return;
 
-  button.addEventListener("click", () => handleStatInteraction(stat));
-  button.addEventListener("touchstart", (e) => {
+  const touchHandler = (e) => {
     e.preventDefault();
     handleStatInteraction(stat);
-  });
-}
+  };
 
-// Add main loop execution
-function gameLoop() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  drawPet();
-  updateStats();
-  updateCooldowns();
-  drawHUD();
-  checkGameConditions();
-  movePet();
-  requestAnimationFrame(gameLoop);
+  button.addEventListener("click", () => handleStatInteraction(stat));
+  button.addEventListener("touchstart", touchHandler, { passive: false });
 }
-
-// Attach buttons on DOMContentLoaded
-window.addEventListener("DOMContentLoaded", () => {
-  ["eat", "sleep", "wash", "play"].forEach(stat => {
-    attachButtonHandlers(`btn${capitalize(stat)}`, stat);
-  });
-  gameLoop();
-});
