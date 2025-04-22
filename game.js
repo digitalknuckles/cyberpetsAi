@@ -112,9 +112,54 @@ function checkGameConditions() {
   const values = Object.values(pet.stats);
   const allZero = values.every((v) => v <= 1);
 
-  if (allZero) {
-    alert("Game Over: Pet has Disappeared");
+ function showGameOverScreen() {
+  const overlay = document.createElement('div');
+  overlay.id = "gameOverOverlay";
+  overlay.style.position = "fixed";
+  overlay.style.top = 0;
+  overlay.style.left = 0;
+  overlay.style.width = "100vw";
+  overlay.style.height = "100vh";
+  overlay.style.backgroundColor = "rgba(0, 0, 0, 0.8)";
+  overlay.style.display = "flex";
+  overlay.style.flexDirection = "column";
+  overlay.style.alignItems = "center";
+  overlay.style.justifyContent = "center";
+  overlay.style.color = "white";
+  overlay.style.fontSize = "2rem";
+  overlay.style.zIndex = 9999;
+
+  const msg = document.createElement('div');
+  msg.textContent = "💀 Game Over: Your pet has disappeared 💔";
+  msg.style.marginBottom = "30px";
+
+  const resetBtn = document.createElement('button');
+  resetBtn.textContent = "Restart Game";
+  resetBtn.style.padding = "10px 20px";
+  resetBtn.style.fontSize = "1.5rem";
+  resetBtn.style.cursor = "pointer";
+  resetBtn.style.border = "none";
+  resetBtn.style.borderRadius = "10px";
+  resetBtn.style.backgroundColor = "#f44336";
+  resetBtn.style.color = "#fff";
+  resetBtn.addEventListener("click", () => {
     window.location.reload();
+  });
+
+  overlay.appendChild(msg);
+  overlay.appendChild(resetBtn);
+  document.body.appendChild(overlay);
+}
+
+function checkGameConditions() {
+  const values = Object.values(pet.stats);
+  const allZero = values.every((v) => v <= 1);
+
+  if (allZero) {
+    if (!document.getElementById("gameOverOverlay")) {
+      showGameOverScreen();
+    }
+    return;
   }
 
   if (globalHealth >= 100 && !trainingUnlocked) {
