@@ -48,6 +48,7 @@ function resizeCanvas() {
   canvas.height = window.innerHeight;
 }
 window.addEventListener("resize", resizeCanvas);
+resizeCanvas();
 
 function drawPet() {
   if (pet.sprite.complete && pet.sprite.naturalWidth > 0) {
@@ -108,11 +109,7 @@ function drawHUD() {
   if (critical) critical.style.display = globalHealth < 10 ? "block" : "none";
 }
 
-function checkGameConditions() {
-  const values = Object.values(pet.stats);
-  const allZero = values.every((v) => v <= 1);
-
- function showGameOverScreen() {
+function showGameOverScreen() {
   const overlay = document.createElement('div');
   overlay.id = "gameOverOverlay";
   overlay.style.position = "fixed";
@@ -217,6 +214,10 @@ function movePetTo(buttonId) {
   pet.y = targetY;
 }
 
+function capitalize(str) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
 function handleStatInteraction(stat) {
   if (statCooldowns[stat] > 0) {
     const btn = document.getElementById(`btn${capitalize(stat)}`);
@@ -304,42 +305,22 @@ function attachButtonHandlers(btnId, stat) {
   });
 }
 
-function capitalize(str) {
-  return str.charAt(0).toUpperCase() + str.slice(1);
-}
-
+// Add main loop execution
 function gameLoop() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  if (!pet.isPaused) movePet();
-
-  updateStats();
   drawPet();
+  updateStats();
+  updateCooldowns();
   drawHUD();
   checkGameConditions();
-  updateCooldowns();
-
-  const buttons = ["btnEat", "btnSleep", "btnWash", "btnPlay"];
-  buttons.forEach(btn => {
-    const stat = btn.replace("btn", "").toLowerCase();
-    if (isCollidingWithButton(btn)) {
-      if (!pet.isPaused) {
-        petCollisionWithStatObject(stat);
-      }
-    }
-  });
-
+  movePet();
   requestAnimationFrame(gameLoop);
 }
 
-window.addEventListener("load", () => {
-  resizeCanvas();
-  console.log("Canvas:", canvas.width, canvas.height);
-  console.log("Pet Position:", pet.x, pet.y);
-  ["btnEat", "btnSleep", "btnWash", "btnPlay"].forEach(btnId => {
-    const stat = btnId.replace("btn", "").toLowerCase();
-    attachButtonHandlers(btnId, stat);
+// Attach buttons on DOMContentLoaded
+window.addEventListener("DOMContentLoaded", () => {
+  ["eat", "sleep", "wash", "play"].forEach(stat => {
+    attachButtonHandlers(`btn${capitalize(stat)}`, stat);
   });
-}
   gameLoop();
 });
