@@ -23,11 +23,12 @@ let pet = {
   isPaused: false,
   pauseDuration: 0,
   collisionMsg: null,
-  lastStatHandled: null
-  //roamSteps: 0
+  lastStatHandled: null,
+  roamSteps: 0,
+  roamPauseCooldown = getRandomInt(7, 15)
 };
-let roamSteps = 0;
-let roamPauseCooldown = getRandomInt(7, 15);
+//let roamSteps = 0;
+//let roamPauseCooldown = getRandomInt(7, 15)
 let isRoamingPaused = false;
 let roamingPauseTimer = 0;
 let roamingPauseDuration = 0;
@@ -213,10 +214,12 @@ function movePet() {
       if (pet.y <= 0 || pet.y + pet.height >= canvas.height) pet.vy *= -1;
 
       // Count this as a roaming step
-      roamSteps++;
-      if (pet.roamSteps >= pet.pauseCooldown) {
+      pet.roamSteps++;
+      if (pet.roamSteps >= pet.roamPauseCooldown) {
         pet.isPaused = true;
-        pet.pauseDuration = getRandomInt(120, 300); // 2–5 seconds at 60fps
+        pet.pauseDuration = getRandomInt(120, 300); // 2–5 seconds
+        pet.roamSteps = 0; // Reset steps for next roam cycle
+        pet.roamPauseCooldown = getRandomInt(7, 15); // Optional: reset cooldown too
       }
     }
   }
