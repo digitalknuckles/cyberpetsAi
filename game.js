@@ -222,7 +222,6 @@ function checkGameConditions() {
 
   if (!pet.roamTarget) {
     chooseNewRoamTarget();
-    return;
   }
 
   const dx = pet.roamTarget.x - pet.x;
