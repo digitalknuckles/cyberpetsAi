@@ -342,3 +342,4 @@ window.addEventListener("load", () => {
   });
   gameLoop();
 });
+}
