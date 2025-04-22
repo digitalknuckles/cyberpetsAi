@@ -24,8 +24,13 @@ let pet = {
   pauseDuration: 0,
   collisionMsg: null,
   lastStatHandled: null
+  
 };
-
+let roamSteps = 0;
+let roamPauseCooldown = getRandomInt(7, 15);
+let isRoamingPaused = false;
+let roamingPauseTimer = 0;
+let roamingPauseDuration = 0;
 let globalHealth = 0;
 let globalTraining = 0;
 let trainingUnlocked = false;
@@ -38,6 +43,10 @@ let statCooldowns = {
 };
 
 let lastStatInteraction = Date.now();
+
+function getRandomInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
 
 pet.sprite.src = "./RobotTeddyAi.png";
 pet.sprite.onload = () => console.log('Pet sprite loaded successfully');
@@ -179,27 +188,36 @@ function checkGameConditions() {
 }
 
 function handleRoamingPause() {
-  if (!pet.pauseEndTime && pet.isRoaming) {
-    pet.isPaused = true;
-    const pauseTime = Math.random() * 3000 + 1000; // between 1000ms and 4000ms
-    pet.pauseEndTime = Date.now() + pauseTime;
-  }
+  if (isRoamingPaused) {
+    roamingPauseTimer++;
 
-  if (pet.isPaused && Date.now() >= pet.pauseEndTime) {
-    pet.isPaused = false;
-    pet.pauseEndTime = null;
+    if (roamingPauseTimer >= roamingPauseDuration) {
+      isRoamingPaused = false;
+      roamingPauseTimer = 0;
+      roamSteps = 0;
+      roamPauseCooldown = getRandomInt(7, 15); // Reset cooldown threshold
+    }
   }
 }
 
 function movePet() {
   if (pet.isRoaming) {
     handleRoamingPause();
+
     if (!pet.isPaused) {
       pet.x += pet.vx * pet.speedMultiplier;
       pet.y += pet.vy * pet.speedMultiplier;
 
+      // Edge bounce
       if (pet.x <= 0 || pet.x + pet.width >= canvas.width) pet.vx *= -1;
       if (pet.y <= 0 || pet.y + pet.height >= canvas.height) pet.vy *= -1;
+
+      // Count this as a roaming step
+      pet.roamSteps++;
+      if (pet.roamSteps >= pet.pauseCooldown) {
+        pet.isPaused = true;
+        pet.pauseDuration = getRandomInt(120, 300); // 2–5 seconds at 60fps
+      }
     }
   }
 }
