@@ -351,7 +351,7 @@ function updateGlobalHealth() {
 
   // Example: Increase difficulty by making health drop faster below 50%
   if (avgStat < 100) {
-    const decayRate = (100 - avgStat) * 0.001; // Increase this number for more difficulty
+    const decayRate = (100 - avgStat) * 0.0005; // Increase this number for more difficulty
     globalHealth = Math.max(0, globalHealth - decayRate);
   }
 }
