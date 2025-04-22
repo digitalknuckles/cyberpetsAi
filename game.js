@@ -363,7 +363,6 @@ function handleStatInteraction(stat) {
       btn.textContent = capitalize(stat);
     }, 10000);
   }
-}
 
 function updateCooldowns() {
   const now = Date.now();
