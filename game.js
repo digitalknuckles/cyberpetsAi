@@ -296,7 +296,7 @@ function updateCooldowns() {
   }
 
   const statsValues = Object.values(pet.stats);
-  const allHigh = statsValues.every(value => value >= 70);
+  const allHigh = statsValues.every(value => value >= 80);
 
   if (allHigh) {
     globalHealth = Math.min(100, globalHealth + 0.15);
