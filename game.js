@@ -347,7 +347,7 @@ function attachButtonHandlers(btnId, stat) {
 //Global health update
 function updateGlobalHealth() {
   const statsValues = Object.values(pet.stats);
-  const allHigh = statsValues.every(value => value >= 50);
+  const allHigh = statsValues.every(value => value >= 80);
   const anyLow = statsValues.some(value => value <= 50);
 
   if (allHigh) {
