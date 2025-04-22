@@ -219,9 +219,6 @@ function movePet() {
   }
 }
 
-updatePetRoaming();
-movePet();
-
 function isCollidingWithButton(btnId) {
   const btn = document.getElementById(btnId);
   const rect = btn.getBoundingClientRect();
@@ -350,23 +347,28 @@ function attachButtonHandlers(btnId, stat) {
 // Main game loop
 function gameLoop() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  movePet();
+  
+  updatePetRoaming();
+  movePet(); // Only call once
   updateStats();
   updateCooldowns();
   drawPet();
   drawHUD();
   checkGameConditions();
+
   requestAnimationFrame(gameLoop);
-  function updatePetRoaming() {
+}
+
+// Define this OUTSIDE the loop
+function updatePetRoaming() {
   if (pet.isPaused) {
     pet.pauseDuration--;
 
     if (pet.pauseDuration <= 0) {
       pet.isPaused = false;
       pet.roamSteps = 0; // Reset roam steps so it can roam again
-      pet.roamPauseCooldown = getRandomInt(7, 15); // Optional: reset cooldown for variety
+      pet.roamPauseCooldown = getRandomInt(7, 15); // New pause cooldown
     }
   }
-}
 }
 gameLoop();
