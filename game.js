@@ -25,7 +25,7 @@ let pet = {
   collisionMsg: null,
   lastStatHandled: null,
   roamSteps: 0,
-  roamPauseCooldown = getRandomInt(7, 15),
+  roamPauseCooldown: getRandomInt(7, 15)
 };
 //let roamSteps = 0;
 //let roamPauseCooldown = getRandomInt(7, 15)
