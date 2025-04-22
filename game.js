@@ -26,7 +26,7 @@ let pet = {
   lastStatHandled: null
 };
 
-let globalHealth = 10;
+let globalHealth = 0;
 let globalTraining = 0;
 let trainingUnlocked = false;
 
@@ -106,7 +106,7 @@ function drawHUD() {
   if (trainingBar) trainingBar.style.width = `${globalTraining}%`;
 
   const critical = document.getElementById("criticalWarning");
-  if (critical) critical.style.display = globalHealth < 10 ? "block" : "none";
+  if (critical) critical.style.display = globalHealth < 5 ? "block" : "none";
 }
 
 function showGameOverScreen() {
