@@ -4,12 +4,12 @@ const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
 let pet = {
-  x: 300,
-  y: 300,
+  x: 150,
+  y: 150,
   vx: 1.5,
   vy: 1.5,
-  width: 80,
-  height: 80,
+  width: 300,
+  height: 300,
   speedMultiplier: 1,
   sprite: new Image(),
   stats: {
@@ -23,10 +23,16 @@ let pet = {
   isPaused: false,
   pauseDuration: 0,
   collisionMsg: null,
-  lastStatHandled: null
+  lastStatHandled: null,
+  roamSteps: 0,
+  roamPauseCooldown: getRandomInt(7, 15)
 };
-
-let globalHealth = 100;
+//let roamSteps = 0;
+//let roamPauseCooldown = getRandomInt(7, 15)
+let isRoamingPaused = false;
+let roamingPauseTimer = 0;
+let roamingPauseDuration = 0;
+let globalHealth = 0;
 let globalTraining = 0;
 let trainingUnlocked = false;
 
@@ -38,6 +44,10 @@ let statCooldowns = {
 };
 
 let lastStatInteraction = Date.now();
+
+function getRandomInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
 
 pet.sprite.src = "./RobotTeddyAi.png";
 pet.sprite.onload = () => console.log('Pet sprite loaded successfully');
@@ -106,7 +116,7 @@ function drawHUD() {
   if (trainingBar) trainingBar.style.width = `${globalTraining}%`;
 
   const critical = document.getElementById("criticalWarning");
-  if (critical) critical.style.display = globalHealth < 10 ? "block" : "none";
+  if (critical) critical.style.display = globalHealth < 15 ? "block" : "none";
 }
 
 function showGameOverScreen() {
@@ -178,13 +188,34 @@ function checkGameConditions() {
   }
 }
 
+function handleRoamingPause() {
+  if (isRoamingPaused) {
+    roamingPauseTimer++;
+
+    if (roamingPauseTimer >= roamingPauseDuration) {
+      isRoamingPaused = false;
+      roamingPauseTimer = 0;
+      roamSteps = 0;
+      roamPauseCooldown = getRandomInt(7, 15); // Reset cooldown threshold
+    }
+  }
+}
+
 function movePet() {
   if (pet.isRoaming && !pet.isPaused) {
     pet.x += pet.vx * pet.speedMultiplier;
     pet.y += pet.vy * pet.speedMultiplier;
 
+    // Edge bounce
     if (pet.x <= 0 || pet.x + pet.width >= canvas.width) pet.vx *= -1;
     if (pet.y <= 0 || pet.y + pet.height >= canvas.height) pet.vy *= -1;
+
+    // Count this as a roaming step
+    pet.roamSteps++;
+    if (pet.roamSteps >= pet.roamPauseCooldown) {
+      pet.isPaused = true;
+      pet.pauseDuration = getRandomInt(120, 300); // Pause 2-5 seconds
+    }
   }
 }
 
@@ -223,7 +254,7 @@ function handleStatInteraction(stat) {
     const btn = document.getElementById(`btn${capitalize(stat)}`);
     if (btn) {
       btn.textContent = `Wait...`;
-      setTimeout(() => btn.textContent = capitalize(stat), 1000);
+      setTimeout(() => btn.textContent = capitalize(stat), 500);
     }
     return;
   }
@@ -249,7 +280,9 @@ function handleStatInteraction(stat) {
 
 function updateCooldowns() {
   const now = Date.now();
-  const delta = (now - lastStatInteraction) / 10000;
+  const delta = (now - lastStatInteraction) / 500;
+  lastStatInteraction = now;
+
   for (let stat in statCooldowns) {
     if (statCooldowns[stat] > 0) {
       statCooldowns[stat] = Math.max(0, statCooldowns[stat] - delta);
@@ -264,7 +297,6 @@ function updateCooldowns() {
 
   const statsValues = Object.values(pet.stats);
   const allHigh = statsValues.every(value => value >= 80);
-  const allMax = statsValues.every(value => value === 100);
 
   if (allHigh) {
     globalHealth = Math.min(100, globalHealth + 0.15);
@@ -298,29 +330,50 @@ function attachButtonHandlers(btnId, stat) {
   const button = document.getElementById(btnId);
   if (!button) return;
 
-  button.addEventListener("click", () => handleStatInteraction(stat));
+  const trigger = () => handleStatInteraction(stat);
+
+  button.addEventListener("click", trigger);
   button.addEventListener("touchstart", (e) => {
     e.preventDefault();
-    handleStatInteraction(stat);
-  });
+    trigger();
+  }, { passive: false });
 }
 
-// Add main loop execution
+// Attach handlers
+["eat", "sleep", "wash", "play"].forEach(stat => {
+  attachButtonHandlers(`btn${capitalize(stat)}`, stat);
+});
+
+// Main game loop
 function gameLoop() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  drawPet();
+  
+  updatePetRoaming();
+  movePet(); // Only call once
   updateStats();
   updateCooldowns();
+  drawPet();
   drawHUD();
   checkGameConditions();
-  movePet();
+
   requestAnimationFrame(gameLoop);
 }
 
-// Attach buttons on DOMContentLoaded
-window.addEventListener("DOMContentLoaded", () => {
-  ["eat", "sleep", "wash", "play"].forEach(stat => {
-    attachButtonHandlers(`btn${capitalize(stat)}`, stat);
-  });
-  gameLoop();
-});
+// Define this OUTSIDE the loop
+function updatePetRoaming() {
+  if (pet.isPaused) {
+    pet.pauseDuration--;
+
+    if (pet.pauseDuration <= 0) {
+      pet.isPaused = false;
+      pet.roamSteps = 0;
+      pet.roamPauseCooldown = getRandomInt(120, 300); // Extend or randomize as you wish
+
+      // 👉 Set a new random direction after pause
+      const angle = Math.random() * Math.PI * 2;
+      pet.vx = Math.cos(angle) * 1.5; // Adjust speed as needed
+      pet.vy = Math.sin(angle) * 1.5;
+    }
+  }
+}
+gameLoop();
