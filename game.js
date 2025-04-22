@@ -200,6 +200,9 @@ function checkGameConditions() {
   }
 }
 
+function movePet() {
+  if (pet.isPaused) return;
+
   if (!pet.isRoaming && pet.targetStat) {
     const btn = document.getElementById(`${pet.targetStat}StatButton`);
     if (btn) {
@@ -209,6 +212,7 @@ function checkGameConditions() {
       const targetY = rect.top - canvasRect.top + rect.height / 2 - pet.height / 2;
       moveTowardTarget(targetX, targetY);
     }
+    return;
   }
 
   // Roaming logic
@@ -218,10 +222,12 @@ function checkGameConditions() {
       pet.roamPauseDuration = 0;
       chooseNewRoamTarget();
     }
+    return;
   }
 
   if (!pet.roamTarget) {
     chooseNewRoamTarget();
+    return;
   }
 
   const dx = pet.roamTarget.x - pet.x;
@@ -232,6 +238,7 @@ function checkGameConditions() {
     pet.roamPauseDuration = Math.floor(Math.random() * 120) + 60;
     pet.roamPauseTimer = pet.roamPauseDuration;
     pet.roamTarget = null;
+    return;
   }
 
   const angle = Math.atan2(dy, dx);
@@ -241,6 +248,7 @@ function checkGameConditions() {
 
   pet.x = Math.max(0, Math.min(canvas.width - pet.width, pet.x));
   pet.y = Math.max(0, Math.min(canvas.height - pet.height, pet.y));
+}
 
 function chooseNewRoamTarget() {
   const margin = 50;
@@ -266,21 +274,9 @@ function isCollidingWithButton(btnId) {
 }
 
 function movePet() {
-  if (pet.isPaused) return;
+  if (!pet.isRoaming || pet.isPaused) return;
 
-  if (!pet.isRoaming && pet.targetStat) {
-    const btn = document.getElementById(`${pet.targetStat}StatButton`);
-    if (btn) {
-      const rect = btn.getBoundingClientRect();
-      const canvasRect = canvas.getBoundingClientRect();
-      const targetX = rect.left - canvasRect.left + rect.width / 2 - pet.width / 2;
-      const targetY = rect.top - canvasRect.top + rect.height / 2 - pet.height / 2;
-      moveTowardTarget(targetX, targetY);
-    }
-    return;
-  }
-
-  // Roaming logic
+  // Pause if we're in a waiting state
   if (pet.roamPauseDuration > 0) {
     pet.roamPauseTimer -= 1;
     if (pet.roamPauseTimer <= 0) {
@@ -363,6 +359,7 @@ function handleStatInteraction(stat) {
       btn.textContent = capitalize(stat);
     }, 10000);
   }
+}
 
 function updateCooldowns() {
   const now = Date.now();
