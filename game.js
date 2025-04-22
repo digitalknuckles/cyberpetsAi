@@ -260,7 +260,7 @@ function handleStatInteraction(stat) {
   }
 
   pet.stats[stat] = Math.min(100, pet.stats[stat] + 25);
-  statCooldowns[stat] = 50;
+  statCooldowns[stat] = 25;
   lastStatInteraction = Date.now();
 
   if (Object.values(pet.stats).every(value => value > 0)) {
