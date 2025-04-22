@@ -3,7 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <title>Digital Pet Game</title>
+  <link rel="icon" href="data:;base64,iVBORw0KGgo="> <!-- Prevent 404 for favicon -->
+
   <style>
     * {
       margin: 0;
@@ -55,6 +58,11 @@
       font-size: 14px;
       cursor: pointer;
       min-width: 80px;
+      transition: background 0.3s;
+    }
+
+    .btn:hover {
+      background-color: #666;
     }
 
     .status-bar {
@@ -145,13 +153,15 @@
   </div>
 
   <div id="criticalWarning">⚠️ Critical Health!</div>
+
   <div id="globalHealthContainer">
     <div id="globalHealthBar"></div>
   </div>
-  <script type="module" src="game.js"></script>
+
   <script type="module">
-    import { mintPrize } from './walletconnect.js';
     import './game.js';
+    import { mintPrize } from './walletconnect.js';
+    // You can now call mintPrize() when needed
   </script>
 </body>
 </html>
