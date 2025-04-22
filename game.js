@@ -76,7 +76,7 @@ function drawPet() {
 
 function updateStats() {
   for (let key in pet.stats) {
-    pet.stats[key] = Math.max(0, pet.stats[key] - 0.1);
+    pet.stats[key] = Math.max(0, pet.stats[key] - 0.05);
     if (pet.stats[key] === 0 && pet.lastStatHandled !== key) {
       pet.isRoaming = false;
       pet.targetStat = key;
@@ -260,7 +260,7 @@ function handleStatInteraction(stat) {
   }
 
   pet.stats[stat] = Math.min(100, pet.stats[stat] + 25);
-  statCooldowns[stat] = 25;
+  statCooldowns[stat] = 20;
   lastStatInteraction = Date.now();
 
   if (Object.values(pet.stats).every(value => value > 0)) {
@@ -351,7 +351,7 @@ function updateGlobalHealth() {
 
   // Example: Increase difficulty by making health drop faster below 50%
   if (avgStat < 100) {
-    const decayRate = (100 - avgStat) * 0.002; // Increase this number for more difficulty
+    const decayRate = (100 - avgStat) * 0.001; // Increase this number for more difficulty
     globalHealth = Math.max(0, globalHealth - decayRate);
   }
 }
