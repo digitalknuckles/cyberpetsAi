@@ -344,6 +344,18 @@ function attachButtonHandlers(btnId, stat) {
   attachButtonHandlers(`btn${capitalize(stat)}`, stat);
 });
 
+//Global health update
+function updateGlobalHealth() {
+  const totalStats = Object.values(pet.stats).reduce((sum, val) => sum + val, 0);
+  const avgStat = totalStats / Object.keys(pet.stats).length;
+
+  // Example: Increase difficulty by making health drop faster below 50%
+  if (avgStat < 100) {
+    const decayRate = (100 - avgStat) * 0.002; // Increase this number for more difficulty
+    globalHealth = Math.max(0, globalHealth - decayRate);
+  }
+}
+
 // Main game loop
 function gameLoop() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -351,6 +363,7 @@ function gameLoop() {
   updatePetRoaming();
   movePet(); // Only call once
   updateStats();
+  updateGlobalHealth(); 
   updateCooldowns();
   drawPet();
   drawHUD();
