@@ -271,9 +271,21 @@ function isCollidingWithButton(btnId) {
 }
 
 function movePet() {
-  if (!pet.isRoaming || pet.isPaused) return;
+  if (pet.isPaused) return;
 
-  // Pause if we're in a waiting state
+  if (!pet.isRoaming && pet.targetStat) {
+    const btn = document.getElementById(`${pet.targetStat}StatButton`);
+    if (btn) {
+      const rect = btn.getBoundingClientRect();
+      const canvasRect = canvas.getBoundingClientRect();
+      const targetX = rect.left - canvasRect.left + rect.width / 2 - pet.width / 2;
+      const targetY = rect.top - canvasRect.top + rect.height / 2 - pet.height / 2;
+      moveTowardTarget(targetX, targetY);
+    }
+    return;
+  }
+
+  // Roaming logic
   if (pet.roamPauseDuration > 0) {
     pet.roamPauseTimer -= 1;
     if (pet.roamPauseTimer <= 0) {
