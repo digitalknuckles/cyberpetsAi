@@ -213,7 +213,7 @@ function movePet() {
       if (pet.y <= 0 || pet.y + pet.height >= canvas.height) pet.vy *= -1;
 
       // Count this as a roaming step
-      pet.roamSteps++;
+      roamSteps++;
       if (pet.roamSteps >= pet.pauseCooldown) {
         pet.isPaused = true;
         pet.pauseDuration = getRandomInt(120, 300); // 2–5 seconds at 60fps
