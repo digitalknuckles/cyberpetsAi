@@ -209,7 +209,6 @@ function checkGameConditions() {
       const targetY = rect.top - canvasRect.top + rect.height / 2 - pet.height / 2;
       moveTowardTarget(targetX, targetY);
     }
-    return;
   }
 
   // Roaming logic
