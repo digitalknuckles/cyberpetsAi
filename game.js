@@ -75,6 +75,8 @@ function drawScene() {
   drawPet();
 }
 
+let showStartMenu = true; // Start menu initially shown
+
 function drawStartMenu() {
   if (startMenuImage.complete && startMenuImage.naturalWidth > 0) {
     ctx.drawImage(startMenuImage, 0, 0, canvas.width, canvas.height);
@@ -83,8 +85,6 @@ function drawStartMenu() {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
   }
 }
-
-let showStartMenu = true; // Start menu initially shown
 
 // Keyboard support
 document.addEventListener("keydown", (e) => {
