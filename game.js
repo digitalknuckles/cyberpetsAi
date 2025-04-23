@@ -75,7 +75,9 @@ function drawScene() {
   drawPet();
 }
 
-let showStartMenu = true; // Start menu initially shown
+let showStartMenu = true;
+const startMenuImage = new Image();
+startMenuImage.src = "./startMenu.png"; 
 
 function drawStartMenu() {
   if (startMenuImage.complete && startMenuImage.naturalWidth > 0) {
