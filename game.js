@@ -74,7 +74,11 @@ function drawScene() {
 
 let showStartMenu = true;
 const startMenuImage = new Image();
-startMenuImage.src = "./startMenu.png"; 
+startMenuImage.src = "./startMenu.png";
+
+let gameStarted = false;
+let allowInput = false;
+
 let allowKeyPress = false;
 setTimeout(() => {
   allowKeyPress = true;
@@ -458,5 +462,6 @@ function updatePetRoaming() {
 }
 startMenuImage.onload = () => {
   console.log("Start menu image loaded");
+  allowInput = true;
   gameLoop();
 };
