@@ -53,11 +53,21 @@ pet.sprite.src = "./RobotTeddyAi.png";
 pet.sprite.onload = () => console.log('Pet sprite loaded successfully');
 pet.sprite.onerror = () => console.error('Failed to load pet sprite image');
 
-const backgroundImage = new Image();
-backgroundImage.src = "./background.png"; // Update path if different
+function drawScene() {
+  if (backgroundImage.complete && backgroundImage.naturalWidth > 0) {
+    ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
+  }
+  drawPet();
+}
 
-const startMenuImage = new Image();
-startMenuImage.src = "./startMenu.png"; // Update path if different
+function drawStartMenu() {
+  if (startMenuImage.complete && startMenuImage.naturalWidth > 0) {
+    ctx.drawImage(startMenuImage, 0, 0, canvas.width, canvas.height);
+  } else {
+    ctx.fillStyle = "black";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
+}
 
 let showStartMenu = true; // Start menu initially shown
 
@@ -390,10 +400,10 @@ function updateGlobalHealth() {
 function gameLoop() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    if (!gameStarted) {
-    drawStartMenu();       
-    requestAnimationFrame(gameLoop);
-    return;                
+  if (showStartMenu) {
+    drawStartMenu();
+  } else {
+    drawScene(); // Your function to render gameplay
   }
 
   drawBackground(); 
