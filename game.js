@@ -29,10 +29,6 @@ let pet = {
   roamPauseCooldown: getRandomInt(7, 15)
 };
 
-// Call once at game start
-const selectedPetSprite = getRandomPetSprite();
-pet.image.src = selectedPetSprite;
-
 //let roamSteps = 0;
 //let roamPauseCooldown = getRandomInt(7, 15)
 let isRoamingPaused = false;
@@ -58,6 +54,7 @@ const petSprites = [
  // "./RobotTeddyAi4.png",
   //"./RobotTeddyAi5.png"
 ];
+
 let lastStatInteraction = Date.now();
 
 function getRandomInt(min, max) {
@@ -71,7 +68,9 @@ function getRandomPetSprite() {
   const index = Math.floor(Math.random() * petSprites.length);
   return petSprites[index];
 }
-
+// Call once at game start
+const selectedPetSprite = getRandomPetSprite();
+pet.image.src = selectedPetSprite;
 //pet.sprite.src = "./RobotTeddyAi.png";
 pet.image.onload = () => console.log('Pet sprite loaded successfully');
 pet.image.onerror = () => console.error('Failed to load pet sprite image');
