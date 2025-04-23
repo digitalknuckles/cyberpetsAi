@@ -25,7 +25,7 @@ let pet = {
   //sprite: new Image()
   image: new Image(),
   stats: {
-    eat: 100,
+    train: 100,
     sleep: 100,
     wash: 100,
     play: 100
@@ -50,7 +50,7 @@ let globalTraining = 0;
 let trainingUnlocked = false;
 
 let statCooldowns = {
-  eat: 0,
+  train: 0,
   sleep: 0,
   wash: 0,
   play: 0
@@ -263,7 +263,7 @@ function checkGameConditions() {
     window.victoryAchieved = true;
     pet.speedMultiplier = 2;
     setTimeout(() => {
-      alert("🎉 Super Star Pet Vibes! 🐾\nMint your prize!");
+      alert("🎉 Your CyberPetAi Has Been Trained! 🐾\nMint your prize!");
       mintPrize();
     }, 300);
   }
@@ -386,7 +386,7 @@ function updateCooldowns() {
 
 function petCollisionWithStatObject(stat) {
   const emojis = {
-    eat: "(^* _ *^)",
+    train: "(^* _ *^)",
     sleep: "(^~ _ ~^)",
     wash: "(^x _ x^)",
     play: "(^O _ O^)"
@@ -421,7 +421,7 @@ function attachButtonHandlers(btnId, stat) {
 }
 
 // Attach handlers
-["eat", "sleep", "wash", "play"].forEach(stat => {
+["train", "sleep", "wash", "play"].forEach(stat => {
   attachButtonHandlers(`btn${capitalize(stat)}`, stat);
 });
 
