@@ -72,11 +72,9 @@ function getRandomPetSprite() {
   return petSprites[index];
 }
 
-const selectedPetSprite = getRandomPetSprite();
-pet.image.src = selectedPetSprite;
 //pet.sprite.src = "./RobotTeddyAi.png";
-pet.sprite.onload = () => console.log('Pet sprite loaded successfully');
-pet.sprite.onerror = () => console.error('Failed to load pet sprite image');
+pet.image.onload = () => console.log('Pet sprite loaded successfully');
+pet.image.onerror = () => console.error('Failed to load pet sprite image');
 
 function drawBackground() {
   // background image:
@@ -144,7 +142,7 @@ window.addEventListener("resize", resizeCanvas);
 resizeCanvas();
 
 function drawPet() {
-  if (pet.image.complete && pet.sprite.naturalWidth > 0) {
+  if (pet.image.complete && pet.image.naturalWidth > 0) {
     ctx.drawImage(pet.image, pet.x, pet.y, pet.width, pet.height);
     if (pet.collisionMsg) {
       ctx.font = "20px Arial";
