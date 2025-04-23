@@ -424,17 +424,24 @@ function updateGlobalHealth() {
 
 // Main game loop
 function gameLoop() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
   if (showStartMenu) {
     drawStartMenu();
   } else {
-    drawScene();         // draws background and pet
-    updateStats();       // reduce pet stats
-    drawHUD();           // update HUD visuals
-    checkGameConditions();
-    movePet();           // move if roaming
-    handleRoamingPause();
-    // any other game logic
+    drawScene(); // Your function to render gameplay
   }
+
+  drawBackground(); 
+  
+  updatePetRoaming();
+  movePet(); // Only call once
+  updateStats();
+  updateGlobalHealth(); 
+  updateCooldowns();
+  drawPet();
+  drawHUD();
+  checkGameConditions();
 
   requestAnimationFrame(gameLoop);
 }
