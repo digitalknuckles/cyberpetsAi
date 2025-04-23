@@ -59,11 +59,20 @@ pet.sprite.src = "./RobotTeddyAi.png";
 pet.sprite.onload = () => console.log('Pet sprite loaded successfully');
 pet.sprite.onerror = () => console.error('Failed to load pet sprite image');
 
+function drawBackground() {
+  // background image:
+  ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
+
+  // Or just a plain background color:
+    //ctx.fillStyle = "#000"; // black background
+    //ctx.fillRect(0, 0, canvas.width, canvas.height);
+}
+
 function drawScene() {
   if (backgroundImage.complete && backgroundImage.naturalWidth > 0) {
     ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
   }
-  drawBackground();
+  drawPet();
 }
 
 function drawStartMenu() {
