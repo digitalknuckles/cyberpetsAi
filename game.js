@@ -63,7 +63,7 @@ function drawScene() {
   if (backgroundImage.complete && backgroundImage.naturalWidth > 0) {
     ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
   }
-  drawPet();
+  drawBackground();
 }
 
 function drawStartMenu() {
