@@ -135,9 +135,18 @@ document.addEventListener("click", (e) => {
 });
 
 function resizeCanvas() {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
+  const parent = canvas.parentElement;
+
+  if (parent) {
+    canvas.width = parent.clientWidth;
+    canvas.height = parent.clientHeight;
+  } else {
+    // Fallback in case canvas has no parent (not recommended)
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
 }
+
 window.addEventListener("resize", resizeCanvas);
 resizeCanvas();
 
