@@ -91,20 +91,21 @@ function drawStartMenu() {
 
 // Keyboard support
 document.addEventListener("keydown", (e) => {
-  if (e.key === "Enter" && showStartMenu && allowKeyPress) {
+  if (e.key === "Enter" && showStartMenu && allowInput) {
     showStartMenu = false;
   }
 });
 
-// Touch or click support for mobile and desktop
+// Touch support
 document.addEventListener("touchstart", (e) => {
-  if (showStartMenu) {
+  if (showStartMenu && allowInput) {
     showStartMenu = false;
   }
 });
 
+// Mouse click support
 document.addEventListener("click", (e) => {
-  if (showStartMenu) {
+  if (showStartMenu && allowInput) {
     showStartMenu = false;
   }
 });
