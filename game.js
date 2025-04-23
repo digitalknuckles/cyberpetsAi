@@ -49,8 +49,12 @@ function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+const backgroundImage = new Image();
+backgroundImage.src = './background.png';
+
 const startMenuImage = new Image();
 startMenuImage.src = './startMenu.png';
+
 pet.sprite.src = "./RobotTeddyAi.png";
 pet.sprite.onload = () => console.log('Pet sprite loaded successfully');
 pet.sprite.onerror = () => console.error('Failed to load pet sprite image');
