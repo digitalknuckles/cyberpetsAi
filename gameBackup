@@ -4,7 +4,7 @@ const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
 let pet = {
-  x: 150,
+  x: 0,
   y: 150,
   vx: 1.5,
   vy: 1.5,
@@ -49,9 +49,70 @@ function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+const backgroundImage = new Image();
+backgroundImage.src = './background.png';
+
 pet.sprite.src = "./RobotTeddyAi.png";
 pet.sprite.onload = () => console.log('Pet sprite loaded successfully');
 pet.sprite.onerror = () => console.error('Failed to load pet sprite image');
+
+function drawBackground() {
+  // background image:
+  ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
+
+  // Or just a plain background color:
+    //ctx.fillStyle = "#000"; // black background
+    //ctx.fillRect(0, 0, canvas.width, canvas.height);
+}
+
+function drawScene() {
+  if (backgroundImage.complete && backgroundImage.naturalWidth > 0) {
+    ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
+  }
+  drawPet();
+}
+
+let showStartMenu = true;
+const startMenuImage = new Image();
+startMenuImage.src = "./startMenu.png";
+
+let gameStarted = false;
+let allowInput = false;
+
+let allowKeyPress = false;
+setTimeout(() => {
+  allowKeyPress = true;
+}, 500);
+
+function drawStartMenu() {
+  if (startMenuImage.complete && startMenuImage.naturalWidth > 0) {
+    ctx.drawImage(startMenuImage, 0, 0, canvas.width, canvas.height);
+  } else {
+    ctx.fillStyle = "black";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
+}
+
+// Keyboard support
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && showStartMenu && allowInput) {
+    showStartMenu = false;
+  }
+});
+
+// Touch support
+document.addEventListener("touchstart", (e) => {
+  if (showStartMenu && allowInput) {
+    showStartMenu = false;
+  }
+});
+
+// Mouse click support
+document.addEventListener("click", (e) => {
+  if (showStartMenu && allowInput) {
+    showStartMenu = false;
+  }
+});
 
 function resizeCanvas() {
   canvas.width = window.innerWidth;
@@ -357,9 +418,18 @@ function updateGlobalHealth() {
   }
 }
 
+
 // Main game loop
 function gameLoop() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  if (showStartMenu) {
+    drawStartMenu();
+  } else {
+    drawScene(); // Your function to render gameplay
+  }
+
+  drawBackground(); 
   
   updatePetRoaming();
   movePet(); // Only call once
@@ -390,4 +460,8 @@ function updatePetRoaming() {
     }
   }
 }
-gameLoop();
+startMenuImage.onload = () => {
+  console.log("Start menu image loaded");
+  allowInput = true;
+  gameLoop();
+};
