@@ -93,16 +93,26 @@ function drawStartMenu() {
   }
 }
 
-function startGame() {
+// Keyboard support
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && showStartMenu && allowInput) {
+    showStartMenu = false;
+  }
+});
+
+// Touch support
+document.addEventListener("touchstart", (e) => {
   if (showStartMenu && allowInput) {
     showStartMenu = false;
-    gameStarted = true;
   }
-}
+});
 
-document.addEventListener("keydown", (e) => { if (e.key === "Enter") startGame(); });
-document.addEventListener("click", startGame);
-document.addEventListener("touchstart", startGame);
+// Mouse click support
+document.addEventListener("click", (e) => {
+  if (showStartMenu && allowInput) {
+    showStartMenu = false;
+  }
+});
 
 function resizeCanvas() {
   canvas.width = window.innerWidth;
