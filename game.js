@@ -118,11 +118,8 @@ function resizeCanvas() {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
 }
-let resizeTimeout;
-window.addEventListener("resize", () => {
-  clearTimeout(resizeTimeout);
-  resizeTimeout = setTimeout(resizeCanvas, 150);
-});
+window.addEventListener("resize", resizeCanvas);
+resizeCanvas();
 
 function drawPet() {
   if (pet.sprite.complete && pet.sprite.naturalWidth > 0) {
