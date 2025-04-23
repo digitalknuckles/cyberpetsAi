@@ -16,7 +16,7 @@ const petSprites = [
 
 let pet = {
   x: 0,
-  y: 150,
+  y: 75,
   vx: 1.5,
   vy: 1.5,
   width: 300,
