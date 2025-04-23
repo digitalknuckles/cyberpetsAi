@@ -75,6 +75,10 @@ function drawScene() {
 let showStartMenu = true;
 const startMenuImage = new Image();
 startMenuImage.src = "./startMenu.png"; 
+let allowKeyPress = false;
+setTimeout(() => {
+  allowKeyPress = true;
+}, 500);
 
 function drawStartMenu() {
   if (startMenuImage.complete && startMenuImage.naturalWidth > 0) {
@@ -87,7 +91,7 @@ function drawStartMenu() {
 
 // Keyboard support
 document.addEventListener("keydown", (e) => {
-  if (e.key === "Enter" && showStartMenu) {
+  if (e.key === "Enter" && showStartMenu && allowKeyPress) {
     showStartMenu = false;
   }
 });
@@ -451,7 +455,6 @@ function updatePetRoaming() {
     }
   }
 }
-
 startMenuImage.onload = () => {
   console.log("Start menu image loaded");
   gameLoop();
