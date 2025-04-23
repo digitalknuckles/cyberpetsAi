@@ -451,4 +451,8 @@ function updatePetRoaming() {
     }
   }
 }
-gameLoop();
+
+startMenuImage.onload = () => {
+  console.log("Start menu image loaded");
+  gameLoop();
+};
