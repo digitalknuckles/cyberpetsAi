@@ -93,26 +93,16 @@ function drawStartMenu() {
   }
 }
 
-// Keyboard support
-document.addEventListener("keydown", (e) => {
-  if (e.key === "Enter" && showStartMenu && allowInput) {
-    showStartMenu = false;
-  }
-});
-
-// Touch support
-document.addEventListener("touchstart", (e) => {
+function startGame() {
   if (showStartMenu && allowInput) {
     showStartMenu = false;
+    gameStarted = true;
   }
-});
+}
 
-// Mouse click support
-document.addEventListener("click", (e) => {
-  if (showStartMenu && allowInput) {
-    showStartMenu = false;
-  }
-});
+document.addEventListener("keydown", (e) => { if (e.key === "Enter") startGame(); });
+document.addEventListener("click", startGame);
+document.addEventListener("touchstart", startGame);
 
 function resizeCanvas() {
   canvas.width = window.innerWidth;
@@ -421,24 +411,17 @@ function updateGlobalHealth() {
 
 // Main game loop
 function gameLoop() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
   if (showStartMenu) {
     drawStartMenu();
   } else {
-    drawScene(); // Your function to render gameplay
+    drawScene();         // draws background and pet
+    updateStats();       // reduce pet stats
+    drawHUD();           // update HUD visuals
+    checkGameConditions();
+    movePet();           // move if roaming
+    handleRoamingPause();
+    // any other game logic
   }
-
-  drawBackground(); 
-  
-  updatePetRoaming();
-  movePet(); // Only call once
-  updateStats();
-  updateGlobalHealth(); 
-  updateCooldowns();
-  drawPet();
-  drawHUD();
-  checkGameConditions();
 
   requestAnimationFrame(gameLoop);
 }
@@ -460,8 +443,7 @@ function updatePetRoaming() {
     }
   }
 }
-startMenuImage.onload = () => {
-  console.log("Start menu image loaded");
+window.onload = () => {
   allowInput = true;
   gameLoop();
 };
