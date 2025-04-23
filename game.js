@@ -3,6 +3,17 @@ import { mintPrize } from './walletconnect.js';
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
+const petSprites = [
+  "./RobotTeddyAi.png",
+  "./RobotTeddyAi0.png",
+  "./RobotTeddyAi1.png"
+  //"./RobotTeddyAi2.png",
+ // "./RobotTeddyAi2.png", // You can keep duplicates for weighting
+  //"./RobotTeddyAi3.png",
+ // "./RobotTeddyAi4.png",
+  //"./RobotTeddyAi5.png"
+];
+
 let pet = {
   x: 0,
   y: 150,
@@ -44,16 +55,6 @@ let statCooldowns = {
   wash: 0,
   play: 0
 };
-const petSprites = [
-  "./RobotTeddyAi.png",
-  "./RobotTeddyAi0.png",
-  "./RobotTeddyAi1.png"
-  //"./RobotTeddyAi2.png",
- // "./RobotTeddyAi2.png", // You can keep duplicates for weighting
-  //"./RobotTeddyAi3.png",
- // "./RobotTeddyAi4.png",
-  //"./RobotTeddyAi5.png"
-];
 
 let lastStatInteraction = Date.now();
 
