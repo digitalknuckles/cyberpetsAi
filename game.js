@@ -3,15 +3,27 @@ import { mintPrize } from './walletconnect.js';
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
+const petSprites = [
+  "./RobotTeddyAi.png",
+  "./RobotTeddyAi0.png",
+  "./RobotTeddyAi1.png"
+  //"./RobotTeddyAi2.png",
+ // "./RobotTeddyAi2.png", // You can keep duplicates for weighting
+  //"./RobotTeddyAi3.png",
+ // "./RobotTeddyAi4.png",
+  //"./RobotTeddyAi5.png"
+];
+
 let pet = {
   x: 0,
-  y: 150,
+  y: 50,
   vx: 1.5,
   vy: 1.5,
   width: 300,
   height: 300,
   speedMultiplier: 1,
-  sprite: new Image(),
+  //sprite: new Image()
+  image: new Image(),
   stats: {
     train: 100,
     sleep: 100,
@@ -27,6 +39,7 @@ let pet = {
   roamSteps: 0,
   roamPauseCooldown: getRandomInt(7, 15)
 };
+
 //let roamSteps = 0;
 //let roamPauseCooldown = getRandomInt(7, 15)
 let isRoamingPaused = false;
@@ -52,9 +65,16 @@ function getRandomInt(min, max) {
 const backgroundImage = new Image();
 backgroundImage.src = './background.png';
 
-pet.sprite.src = "./RobotTeddyAi.png";
-pet.sprite.onload = () => console.log('Pet sprite loaded successfully');
-pet.sprite.onerror = () => console.error('Failed to load pet sprite image');
+function getRandomPetSprite() {
+  const index = Math.floor(Math.random() * petSprites.length);
+  return petSprites[index];
+}
+// Call once at game start
+const selectedPetSprite = getRandomPetSprite();
+pet.image.src = selectedPetSprite;
+//pet.sprite.src = "./RobotTeddyAi.png";
+pet.image.onload = () => console.log('Pet sprite loaded successfully');
+pet.image.onerror = () => console.error('Failed to load pet sprite image');
 
 function drawBackground() {
   // background image:
@@ -115,15 +135,24 @@ document.addEventListener("click", (e) => {
 });
 
 function resizeCanvas() {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
+  const parent = canvas.parentElement;
+
+  if (parent) {
+    canvas.width = parent.clientWidth;
+    canvas.height = parent.clientHeight;
+  } else {
+    // Fallback in case canvas has no parent (not recommended)
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
 }
+
 window.addEventListener("resize", resizeCanvas);
 resizeCanvas();
 
 function drawPet() {
-  if (pet.sprite.complete && pet.sprite.naturalWidth > 0) {
-    ctx.drawImage(pet.sprite, pet.x, pet.y, pet.width, pet.height);
+  if (pet.image.complete && pet.image.naturalWidth > 0) {
+    ctx.drawImage(pet.image, pet.x, pet.y, pet.width, pet.height);
     if (pet.collisionMsg) {
       ctx.font = "20px Arial";
       ctx.fillStyle = "black";
@@ -243,7 +272,7 @@ function checkGameConditions() {
     window.victoryAchieved = true;
     pet.speedMultiplier = 2;
     setTimeout(() => {
-      alert("🎉 You Trained Your Pet! 🐾\nMint your prize!");
+      alert("🎉 Your CyberPetAi Has Been Trained! 🐾\nMint your prize!");
       mintPrize();
     }, 300);
   }
