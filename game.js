@@ -268,14 +268,13 @@ function checkGameConditions() {
     globalTraining = Math.min(100, globalTraining + 0.25);
   }
 
-  if (globalHealth >= 100 && trainingUnlocked && globalTraining >= 100 && !window.victoryAchieved) {
-    window.victoryAchieved = true;
-    pet.speedMultiplier = 2;
-    setTimeout(() => {
-      alert("🎉 Your CyberPetAi Has Been Trained! 🐾\nMint your prize!");
-      mintPrize();
-    }, 300);
-  }
+if (globalHealth >= 100 && trainingUnlocked && globalTraining >= 100 && !window.victoryAchieved) {
+  window.victoryAchieved = true;
+  pet.speedMultiplier = 2;
+  setTimeout(() => {
+    const overlay = document.getElementById('messageOverlay');
+    overlay.style.display = 'block';
+  }, 300);
 }
 
 function handleRoamingPause() {
