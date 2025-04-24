@@ -1,2 +1,2 @@
 # cyberpets
-Building an App to for FunFart Games, Digitalknuckles, and LazerPixel Hub!
+Building an App for FunFart Games, Digitalknuckles, and LazerPixel Hub!
