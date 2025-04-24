@@ -101,6 +101,23 @@ function drawScene() {
   drawPet();
 }
 
+// Attach stat button listeners once DOM is ready
+window.addEventListener("DOMContentLoaded", () => {
+  const stats = ["train", "sleep", "wash", "play"];
+
+  stats.forEach(stat => {
+    const btn = document.getElementById(`btn${capitalize(stat)}`);
+    if (btn) {
+      btn.addEventListener("click", () => handleStatInteraction(stat));
+    }
+  });
+});
+
+// Helper to capitalize the stat names
+function capitalize(str) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
 let showStartMenu = true;
 const startMenuImage = new Image();
 startMenuImage.src = "./startMenu.png";
@@ -389,9 +406,10 @@ function handleStatInteraction(stat) {
 
 function updateCooldowns() {
   const now = Date.now();
+  if (!lastStatInteraction) lastStatInteraction = now; // Fallback init
   const delta = (now - lastStatInteraction) / 500;
   lastStatInteraction = now;
-
+  
   for (let stat in statCooldowns) {
     if (statCooldowns[stat] > 0) {
       statCooldowns[stat] = Math.max(0, statCooldowns[stat] - delta);
@@ -405,8 +423,8 @@ function updateCooldowns() {
   }
 
   const statsValues = Object.values(pet.stats);
-  const allHigh = statsValues.every(value => value >= 80);
 
+  const allHigh = Object.values(pet.stats).every(value => value >= 80);
   if (allHigh) {
     globalHealth = Math.min(100, globalHealth + 0.05);
   }
