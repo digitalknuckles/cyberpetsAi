@@ -489,13 +489,29 @@ function updatePetRoaming() {
 
     if (pet.pauseDuration <= 0) {
       pet.isPaused = false;
+      pet.pauseDuration = 0;
       pet.roamSteps = 0;
-      pet.roamPauseCooldown = getRandomInt(120, 300); // Extend or randomize as you wish
+      pet.roamPauseCooldown = getRandomInt(120, 300); // You can adjust this range
 
-      // 👉 Set a new random direction after pause
+      // ✅ Set new random direction after pause
       const angle = Math.random() * Math.PI * 2;
-      pet.vx = Math.cos(angle) * 1.5; // Adjust speed as needed
-      pet.vy = Math.sin(angle) * 1.5;
+      pet.vx = Math.cos(angle);
+      pet.vy = Math.sin(angle);
+    }
+  } else {
+    // Move the pet if not paused
+    pet.x += pet.vx * pet.speedMultiplier;
+    pet.y += pet.vy * pet.speedMultiplier;
+
+    // Bounce off edges
+    if (pet.x <= 0 || pet.x + pet.width >= canvas.width) pet.vx *= -1;
+    if (pet.y <= 0 || pet.y + pet.height >= canvas.height) pet.vy *= -1;
+
+    // Track roaming steps
+    pet.roamSteps++;
+    if (pet.roamSteps >= pet.roamPauseCooldown) {
+      pet.isPaused = true;
+      pet.pauseDuration = getRandomInt(120, 300); // Pause 2–5 seconds
     }
   }
 }
