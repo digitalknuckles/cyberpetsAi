@@ -274,7 +274,7 @@ if (globalHealth >= 100 && trainingUnlocked && globalTraining >= 100 && !window.
 
 function postToParent(action, payload = {}) {
   if (window.parent !== window) {
-    window.parent.postMessage({ action, ...payload }, "*"); // Restrict targetOrigin in production
+    window.parent.postMessage({ action, ...payload }, "https://https://digitalknuckles.github.io/cyberpetsAi/"); // Restrict targetOrigin in production
   }
 }
   
