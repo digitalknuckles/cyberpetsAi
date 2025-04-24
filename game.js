@@ -263,7 +263,7 @@ function showGameOverScreen() {
   overlay.style.zIndex = 9999;
 
   const msg = document.createElement('div');
-  msg.textContent = "💀 Game Over: Your pet has Vanished 💔";
+  msg.textContent = "💀 Game Over: Your pet is Damaged 💔";
   msg.style.marginBottom = "30px";
 
   const resetBtn = document.createElement('button');
