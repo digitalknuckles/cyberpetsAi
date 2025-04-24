@@ -271,18 +271,21 @@ function checkGameConditions() {
 if (globalHealth >= 100 && trainingUnlocked && globalTraining >= 100 && !window.victoryAchieved) {
   window.victoryAchieved = true;
   pet.speedMultiplier = 2;
-  
-  // Check if wallet is connected before proceeding with minting
-  if (isWalletConnected()) {
-    setTimeout(() => {
-      alert("🎉 Your CyberPetAi Has Been Trained! 🐾\nMint your prize!");
-      mintPrize();
-    }, 300);
-  } else {
-    alert("Please connect your wallet to mint the prize.");
-    // Optionally trigger wallet connection here
-    connectWallet(); // This would be your wallet connection function
-  }
+
+  // Ensure wallet is connected before minting
+  connectWallet().then(() => {
+    alert("🎉 Your CyberPetAi Has Been Trained! 🐾\nMint your prize!");
+    mintPrize().then(() => {
+      console.log('Prize minted successfully!');
+      // Optionally show success UI, trophy, or other post-minting behavior here
+    }).catch((error) => {
+      console.error('Minting failed:', error);
+      alert('Failed to mint the prize, please try again.');
+    });
+  }).catch((error) => {
+    console.error('Failed to connect wallet:', error);
+    alert('Please connect your wallet to mint the prize.');
+  });
 }
 
 function handleRoamingPause() {
