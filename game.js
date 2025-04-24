@@ -271,10 +271,18 @@ function checkGameConditions() {
 if (globalHealth >= 100 && trainingUnlocked && globalTraining >= 100 && !window.victoryAchieved) {
   window.victoryAchieved = true;
   pet.speedMultiplier = 2;
-  setTimeout(() => {
-    const overlay = document.getElementById('messageOverlay');
-    overlay.style.display = 'block';
-  }, 300);
+  
+  // Check if wallet is connected before proceeding with minting
+  if (isWalletConnected()) {
+    setTimeout(() => {
+      alert("🎉 Your CyberPetAi Has Been Trained! 🐾\nMint your prize!");
+      mintPrize();
+    }, 300);
+  } else {
+    alert("Please connect your wallet to mint the prize.");
+    // Optionally trigger wallet connection here
+    connectWallet(); // This would be your wallet connection function
+  }
 }
 
 function handleRoamingPause() {
