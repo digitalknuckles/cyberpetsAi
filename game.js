@@ -176,17 +176,21 @@ function drawPet() {
 // Define the updated updateStats function
 function updateStats() {
   for (let key in pet.stats) {
+    // 👇 Gradual decay
+    pet.stats[key] = Math.max(0, pet.stats[key] - 0.1);  // or adjust speed of decay
+
+    // 👇 Check for stat at zero and handle timer logic
     if (pet.stats[key] <= 0) {
       if (pet.zeroTimers[key] === null) {
-        pet.zeroTimers[key] = Date.now(); // Start timer
+        pet.zeroTimers[key] = Date.now(); // Start the timer
       } else {
         const elapsed = (Date.now() - pet.zeroTimers[key]) / 1000;
         if (elapsed >= pet.timers[key]) {
-          showGameOverScreen(); // Trigger Game Over if too much time passed
+          showGameOverScreen(); // Trigger Game Over
         }
       }
     } else {
-      pet.zeroTimers[key] = null; // Reset if stat is restored
+      pet.zeroTimers[key] = null; // Reset zero-timer if stat is restored
     }
   }
 }
