@@ -22,13 +22,24 @@ let pet = {
   width: 300,
   height: 300,
   speedMultiplier: 1,
-  //sprite: new Image()
   image: new Image(),
   stats: {
     train: 100,
     sleep: 100,
     wash: 100,
     play: 100
+  },
+  timers: {
+    train: 10,
+    sleep: 10,
+    wash: 10,
+    play: 10
+  },
+  zeroTimers: {
+    train: null,
+    sleep: null,
+    wash: null,
+    play: null
   },
   isRoaming: true,
   targetStat: null,
@@ -40,8 +51,6 @@ let pet = {
   roamPauseCooldown: getRandomInt(7, 15)
 };
 
-//let roamSteps = 0;
-//let roamPauseCooldown = getRandomInt(7, 15)
 let isRoamingPaused = false;
 let roamingPauseTimer = 0;
 let roamingPauseDuration = 0;
@@ -164,16 +173,17 @@ function drawPet() {
   }
 }
 
-function updateStats() {
-  for (let key in pet.stats) {
-    pet.stats[key] = Math.max(0, pet.stats[key] - 0.1);
-    if (pet.stats[key] === 0 && pet.lastStatHandled !== key) {
-      pet.isRoaming = false;
-      pet.targetStat = key;
-      movePetTo(`${key}StatButton`);
-      pet.lastStatHandled = key;
+if (pet.stats[key] <= 0) {
+  if (pet.zeroTimers[key] === null) {
+    pet.zeroTimers[key] = Date.now(); // Start timer
+  } else {
+    const elapsed = (Date.now() - pet.zeroTimers[key]) / 1000;
+    if (elapsed >= pet.timers[key]) {
+      showGameOverScreen(); // Trigger Game Over if too much time passed
     }
   }
+} else {
+  pet.zeroTimers[key] = null; // Reset if stat is restored
 }
 
 function drawHUD() {
