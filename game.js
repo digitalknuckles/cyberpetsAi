@@ -308,10 +308,75 @@ function checkGameConditions() {
     window.victoryAchieved = true;
     pet.speedMultiplier = 2;
     setTimeout(() => {
-      alert("🎉 Your CyberPetAi Has Been Trained! 🐾\nMint your prize!");
-      mintPrize();
+      showVictoryOverlay(); // shows the full screen overlay
     }, 300);
-  }
+      }
+    }
+
+function showVictoryOverlay() {
+  // Prevent multiple overlays
+  if (document.getElementById("victoryOverlay")) return;
+
+  const overlay = document.createElement('div');
+  overlay.id = "victoryOverlay";
+  overlay.style = `
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background-color: rgba(0, 0, 0, 0.85);
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    z-index: 9999;
+    color: white;
+    font-size: 2rem;
+    text-align: center;
+  `;
+
+  const msg = document.createElement('div');
+  msg.textContent = "🎉 You Have Trained Your Pet!";
+  msg.style.marginBottom = "20px";
+
+  const prizeImage = document.createElement('img');
+  prizeImage.src = "assets/Prize.png"; // Adjust path if needed
+  prizeImage.style = `
+    width: 180px;
+    height: 180px;
+    margin-bottom: 20px;
+    border-radius: 15px;
+    box-shadow: 0 0 20px #fff;
+  `;
+
+  const mintBtn = document.createElement('button');
+  mintBtn.textContent = "Mint Prize";
+  mintBtn.style = btnStyle('#4CAF50');
+  mintBtn.addEventListener('click', () => {
+    mintPrize();
+  });
+
+  const restartBtn = document.createElement('button');
+  restartBtn.textContent = "Restart";
+  restartBtn.style = btnStyle('#f44336');
+  restartBtn.addEventListener('click', () => {
+    window.location.reload();
+  });
+
+  overlay.append(msg, prizeImage, mintBtn, restartBtn);
+  document.body.appendChild(overlay);
+}
+
+function btnStyle(bg) {
+  return `
+    padding: 12px 24px;
+    font-size: 1.5rem;
+    cursor: pointer;
+    border: none;
+    border-radius: 10px;
+    background-color: ${bg};
+    color: white;
+    margin: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    transition: transform 0.2s;
+  `;
 }
 
 function handleRoamingPause() {
