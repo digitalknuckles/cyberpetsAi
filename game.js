@@ -97,11 +97,10 @@ const startMenuImage = new Image();
 startMenuImage.src = "./startMenu.png";
 
 let gameStarted = false;
-let allowInput = false;
 
-let allowKeyPress = false;
+let allowInput = false;
 setTimeout(() => {
-  allowKeyPress = true;
+  allowInput = true;
 }, 500);
 
 function drawStartMenu() {
