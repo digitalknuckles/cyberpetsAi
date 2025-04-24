@@ -319,64 +319,67 @@ function showVictoryOverlay() {
 
   const overlay = document.createElement('div');
   overlay.id = "victoryOverlay";
-  overlay.style = `
-    position: fixed;
-    top: 0; left: 0;
-    width: 100vw; height: 100vh;
-    background-color: rgba(0, 0, 0, 0.85);
-    display: flex; flex-direction: column;
-    justify-content: center; align-items: center;
-    z-index: 9999;
-    color: white;
-    font-size: 2rem;
-    text-align: center;
-  `;
+  overlay.style.position = "fixed";
+  overlay.style.top = 0;
+  overlay.style.left = 0;
+  overlay.style.width = "100vw";
+  overlay.style.height = "100vh";
+  overlay.style.backgroundColor = "rgba(0, 0, 0, 0.85)";
+  overlay.style.display = "flex";
+  overlay.style.flexDirection = "column";
+  overlay.style.alignItems = "center";
+  overlay.style.justifyContent = "center";
+  overlay.style.zIndex = 10000;
+  overlay.style.color = "white";
+  overlay.style.textAlign = "center";
 
-  const msg = document.createElement('div');
-  msg.textContent = "🎉 You Have Trained Your Pet!";
-  msg.style.marginBottom = "20px";
-
-  const prizeImage = document.createElement('img');
-  prizeImage.src = "assets/Prize.png"; // Adjust path if needed
-  prizeImage.style = `
-    width: 180px;
-    height: 180px;
-    margin-bottom: 20px;
-    border-radius: 15px;
-    box-shadow: 0 0 20px #fff;
-  `;
+  const message = document.createElement('div');
+  message.innerHTML = "🏆 Victory! You fully trained your companion!";
+  message.style.fontSize = "2.5rem";
+  message.style.marginBottom = "20px";
 
   const mintBtn = document.createElement('button');
-  mintBtn.textContent = "Mint Prize";
-  mintBtn.style = btnStyle('#4CAF50');
-  mintBtn.addEventListener('click', () => {
-    mintPrize();
+  mintBtn.textContent = "Mint Your Trophy";
+  mintBtn.style.padding = "12px 24px";
+  mintBtn.style.fontSize = "1.5rem";
+  mintBtn.style.cursor = "pointer";
+  mintBtn.style.marginBottom = "15px";
+  mintBtn.style.borderRadius = "10px";
+  mintBtn.style.border = "none";
+  mintBtn.style.backgroundColor = "#4CAF50";
+  mintBtn.style.color = "white";
+
+  mintBtn.addEventListener("click", async () => {
+    try {
+      mintBtn.disabled = true;
+      mintBtn.textContent = "Minting...";
+      await mintPrize(); // <- your Web3 function
+      mintBtn.textContent = "Minted! 🎉";
+    } catch (error) {
+      console.error("Minting failed:", error);
+      mintBtn.textContent = "Mint Failed 😢";
+      mintBtn.disabled = false;
+    }
   });
 
   const restartBtn = document.createElement('button');
-  restartBtn.textContent = "Restart";
-  restartBtn.style = btnStyle('#f44336');
-  restartBtn.addEventListener('click', () => {
+  restartBtn.textContent = "Restart Game";
+  restartBtn.style.padding = "10px 20px";
+  restartBtn.style.fontSize = "1.25rem";
+  restartBtn.style.cursor = "pointer";
+  restartBtn.style.borderRadius = "10px";
+  restartBtn.style.border = "none";
+  restartBtn.style.backgroundColor = "#f44336";
+  restartBtn.style.color = "#fff";
+
+  restartBtn.addEventListener("click", () => {
     window.location.reload();
   });
 
-  overlay.append(msg, prizeImage, mintBtn, restartBtn);
+  overlay.appendChild(message);
+  overlay.appendChild(mintBtn);
+  overlay.appendChild(restartBtn);
   document.body.appendChild(overlay);
-}
-
-function btnStyle(bg) {
-  return `
-    padding: 12px 24px;
-    font-size: 1.5rem;
-    cursor: pointer;
-    border: none;
-    border-radius: 10px;
-    background-color: ${bg};
-    color: white;
-    margin: 10px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-    transition: transform 0.2s;
-  `;
 }
 
 function handleRoamingPause() {
