@@ -493,3 +493,4 @@ startMenuImage.onload = () => {
   allowInput = true;
   gameLoop();
 };
+}
