@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>CyberPets AI</title>
+  <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      height: 100%;
+      width: 100%;
+      background: #000;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      background: lightgray;
+      border: 2px solid black;
+      touch-action: none;
+    }
+
+    #ui {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      right: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-around;
+      gap: 20px;
+      z-index: 10;
+    }
+
+    .btn-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .btn {
+      background-color: #444;
+      color: #fff;
+      padding: 10px 14px;
+      border: none;
+      border-radius: 12px;
+      font-size: 14px;
+      cursor: pointer;
+      min-width: 80px;
+      transition: background 0.3s;
+    }
+
+    .btn:hover {
+      background-color: #666;
+    }
+
+    .status-bar {
+      margin-top: 4px;
+      height: 6px;
+      border-radius: 3px;
+      background: #333;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    .status-bar::after {
+      content: "";
+      display: block;
+      height: 100%;
+      background: limegreen;
+      width: 100%;
+      transition: width 0.2s;
+    }
+
+    .green::after { background: limegreen; }
+    .red::after { background: red; }
+    .blink-red::after {
+      background: red;
+      animation: blink 1s infinite;
+    }
+    .blink-green::after {
+      background: limegreen;
+      animation: blink 1s infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    #globalHealthContainer {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      width: 200px;
+      height: 10px;
+      background: #333;
+      border-radius: 5px;
+      overflow: hidden;
+    }
+
+    #globalHealthBar {
+      width: 100%;
+      height: 100%;
+      background: limegreen;
+      transition: width 0.2s;
+    }
+
+    #criticalWarning {
+      position: absolute;
+      bottom: 30px;
+      right: 10px;
+      color: red;
+      font-weight: bold;
+      display: none;
+    }
+
+    /* Overlay for iframe-safe victory */
+    #messageOverlay {
+      position: absolute;
+      top: 40%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: white;
+      font-family: sans-serif;
+      font-size: 1.2rem;
+      background: rgba(0,0,0,0.8);
+      padding: 20px;
+      border-radius: 12px;
+      display: none;
+      text-align: center;
+      z-index: 20;
+    }
+
+    #mintBtn {
+      margin-top: 10px;
+      padding: 10px 20px;
+      background: #00ffcc;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="gameCanvas"></canvas>
+
+  <div id="ui">
+    <div class="btn-group">
+      <button class="btn" id="btnTrain" tabindex="1">🔌 Train</button>
+      <div class="status-bar" id="trainBar"></div>
+    </div>
+    <div class="btn-group">
+      <button class="btn" id="btnSleep" tabindex="2">😴 Sleep</button>
+      <div class="status-bar" id="sleepBar"></div>
+    </div>
+    <div class="btn-group">
+      <button class="btn" id="btnWash" tabindex="3">🛁 Wash</button>
+      <div class="status-bar" id="washBar"></div>
+    </div>
+    <div class="btn-group">
+      <button class="btn" id="btnPlay" tabindex="4">🎮 Play</button>
+      <div class="status-bar" id="playBar"></div>
+    </div>
+    <div class="btn-group">
+      <button class="btn" id="btnConnect" tabindex="5">🔌 Connect Wallet</button>
+    </div>
+  </div>
+
+  <div id="criticalWarning">⚠️ Critical Health!</div>
+
+  <div id="globalHealthContainer">
+    <div id="globalHealthBar"></div>
+  </div>
+
+  <!-- Victory Overlay -->
+  <div id="messageOverlay">
+    <div id="messageText"></div>
+    <button id="mintBtn" onclick="openMint()">MINT TROPHY</button>
+  </div>
+
+  <script type="module">
+    import './game.js';
+    import { mintPrize } from './walletconnect.js';
+
+    // For OpenSea-safe mint redirect
+    window.openMint = function () {
+      // Or call mintPrize() directly if you want to trigger walletconnect
+      window.open("https://yourmintsite.com", "_blank");
+    };
+  </script>
+</body>
+</html>
