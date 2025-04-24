@@ -371,10 +371,6 @@ function movePetTo(buttonId) {
   pet.y = targetY;
 }
 
-function capitalize(str) {
-  return str.charAt(0).toUpperCase() + str.slice(1);
-}
-
 function handleStatInteraction(stat) {
   if (statCooldowns[stat] > 0) {
     const btn = document.getElementById(`btn${capitalize(stat)}`);
