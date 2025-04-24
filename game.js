@@ -272,12 +272,20 @@ if (globalHealth >= 100 && trainingUnlocked && globalTraining >= 100 && !window.
   window.victoryAchieved = true;
   pet.speedMultiplier = 2;
 
+function postToParent(action, payload = {}) {
+  if (window.parent !== window) {
+    window.parent.postMessage({ action, ...payload }, "*"); // Restrict targetOrigin in production
+  }
+}
+  
   // Ensure wallet is connected before minting
+if (window !== window.parent) {
+  postToParent("victory-achieved", { message: "🎉 Trained! Mint your prize!" });
+} else {
   connectWallet().then(() => {
     alert("🎉 Your CyberPetAi Has Been Trained! 🐾\nMint your prize!");
     mintPrize().then(() => {
       console.log('Prize minted successfully!');
-      // Optionally show success UI, trophy, or other post-minting behavior here
     }).catch((error) => {
       console.error('Minting failed:', error);
       alert('Failed to mint the prize, please try again.');
