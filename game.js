@@ -585,7 +585,7 @@ function showVictoryOverlay() {
 
   // Add the prize image
   const prizeImg = document.createElement('img');
-  prizeImg.src = "assets/prize.gif"; // Update path if needed
+  prizeImg.src = "./prize.gif"; // Update path if needed
   prizeImg.alt = "Victory Prize";
   prizeImg.style.width = "300px";
   prizeImg.style.height = "auto";
