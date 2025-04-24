@@ -263,7 +263,7 @@ function showGameOverScreen() {
   overlay.style.zIndex = 9999;
 
   const msg = document.createElement('div');
-  msg.textContent = "💀 Game Over: Your pet is Damaged 💔";
+  msg.textContent = "💀 Kill Command: CyberPet is Damaged 💔";
   msg.style.marginBottom = "30px";
 
   const resetBtn = document.createElement('button');
