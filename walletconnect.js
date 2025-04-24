@@ -69,3 +69,19 @@ export async function mintPrize() {
     throw new Error('Minting failed');
   }
 }
+window.addEventListener("message", (event) => {
+  const { action, message } = event.data;
+
+  if (action === "victory-achieved") {
+    alert(message);
+    // Here you can trigger wallet connection/minting in the parent scope
+    connectWallet().then(() => {
+      return mintPrize();
+    }).then(() => {
+      alert("🏆 NFT Minted Successfully!");
+    }).catch((err) => {
+      console.error("Minting error:", err);
+      alert("Error minting NFT.");
+    });
+  }
+});
