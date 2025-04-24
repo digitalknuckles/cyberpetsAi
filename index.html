@@ -116,6 +116,9 @@ canvas {
       background: limegreen;
       transition: width 0.2s;
     }
+    body {
+      position: relative; /* needed for absolute child positioning */
+    }
 
     #criticalWarning {
       position: absolute;
@@ -147,12 +150,12 @@ canvas {
       <button class="btn" id="btnPlay" tabindex="4">🎮 Play</button>
       <div class="status-bar" id="playBar"></div>
     </div>
-    <div class="btn-group">
-      <button class="btn" id="btnConnect" tabindex="5" disabled>🔌 Connect Wallet</button>
-      <div id="trainingProgressContainer" style="width: 100%; height: 10px; background: #333; margin-top: 5px; border-radius: 4px;">
-        <div id="trainingProgressBar" style="width: 0%; height: 100%; background: yellow; border-radius: 4px;"></div>
-      </div>
-    </div>
+<div class="btn-group">
+  <button class="btn" id="btnConnect" tabindex="5" disabled>🔌 Connect Wallet</button>
+  <div id="trainingProgressContainer" style="width: 100%; height: 10px; background: #333; margin-top: 5px; border-radius: 4px;">
+    <div id="trainingProgressBar" style="width: 0%; height: 100%; background: yellow; border-radius: 4px;"></div>
+  </div>
+</div>
 
   <div id="criticalWarning">⚠️ Critical Health!</div>
 
