@@ -173,17 +173,19 @@ function drawPet() {
   }
 }
 
-if (pet.stats[key] <= 0) {
-  if (pet.zeroTimers[key] === null) {
-    pet.zeroTimers[key] = Date.now(); // Start timer
-  } else {
-    const elapsed = (Date.now() - pet.zeroTimers[key]) / 1000;
-    if (elapsed >= pet.timers[key]) {
-      showGameOverScreen(); // Trigger Game Over if too much time passed
+for (let key in pet.stats) {
+  if (pet.stats[key] <= 0) {
+    if (pet.zeroTimers[key] === null) {
+      pet.zeroTimers[key] = Date.now(); // Start timer
+    } else {
+      const elapsed = (Date.now() - pet.zeroTimers[key]) / 1000;
+      if (elapsed >= pet.timers[key]) {
+        showGameOverScreen(); // Trigger Game Over if too much time passed
+      }
     }
+  } else {
+    pet.zeroTimers[key] = null; // Reset if stat is restored
   }
-} else {
-  pet.zeroTimers[key] = null; // Reset if stat is restored
 }
 
 function drawHUD() {
