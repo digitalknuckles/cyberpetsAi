@@ -313,75 +313,6 @@ function checkGameConditions() {
       }
     }
 
-function showVictoryOverlay() {
-  // Prevent multiple overlays
-  if (document.getElementById("victoryOverlay")) return;
-
-  const overlay = document.createElement('div');
-  overlay.id = "victoryOverlay";
-  overlay.style.position = "fixed";
-  overlay.style.top = 0;
-  overlay.style.left = 0;
-  overlay.style.width = "100vw";
-  overlay.style.height = "100vh";
-  overlay.style.backgroundColor = "rgba(0, 0, 0, 0.85)";
-  overlay.style.display = "flex";
-  overlay.style.flexDirection = "column";
-  overlay.style.alignItems = "center";
-  overlay.style.justifyContent = "center";
-  overlay.style.zIndex = 10000;
-  overlay.style.color = "white";
-  overlay.style.textAlign = "center";
-
-  const message = document.createElement('div');
-  message.innerHTML = "🏆 Victory! You fully trained your companion!";
-  message.style.fontSize = "2.5rem";
-  message.style.marginBottom = "20px";
-
-  const mintBtn = document.createElement('button');
-  mintBtn.textContent = "Mint Your Trophy";
-  mintBtn.style.padding = "12px 24px";
-  mintBtn.style.fontSize = "1.5rem";
-  mintBtn.style.cursor = "pointer";
-  mintBtn.style.marginBottom = "15px";
-  mintBtn.style.borderRadius = "10px";
-  mintBtn.style.border = "none";
-  mintBtn.style.backgroundColor = "#4CAF50";
-  mintBtn.style.color = "white";
-
-  mintBtn.addEventListener("click", async () => {
-    try {
-      mintBtn.disabled = true;
-      mintBtn.textContent = "Minting...";
-      await mintPrize(); // <- your Web3 function
-      mintBtn.textContent = "Minted! 🎉";
-    } catch (error) {
-      console.error("Minting failed:", error);
-      mintBtn.textContent = "Mint Failed 😢";
-      mintBtn.disabled = false;
-    }
-  });
-
-  const restartBtn = document.createElement('button');
-  restartBtn.textContent = "Restart Game";
-  restartBtn.style.padding = "10px 20px";
-  restartBtn.style.fontSize = "1.25rem";
-  restartBtn.style.cursor = "pointer";
-  restartBtn.style.borderRadius = "10px";
-  restartBtn.style.border = "none";
-  restartBtn.style.backgroundColor = "#f44336";
-  restartBtn.style.color = "#fff";
-
-  restartBtn.addEventListener("click", () => {
-    window.location.reload();
-  });
-
-  overlay.appendChild(message);
-  overlay.appendChild(mintBtn);
-  overlay.appendChild(restartBtn);
-  document.body.appendChild(overlay);
-}
-
 function handleRoamingPause() {
   if (isRoamingPaused) {
     roamingPauseTimer++;
@@ -548,9 +479,13 @@ function updateGlobalHealth() {
   }
 }
 
-
 // Main game loop
+let victoryAchieved = false;  // Flag to track if victory is achieved
+
 function gameLoop() {
+  // If victory is achieved, stop the game loop
+  if (victoryAchieved) return;
+
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   if (showStartMenu) {
@@ -606,8 +541,103 @@ function updatePetRoaming() {
     }
   }
 }
+
 startMenuImage.onload = () => {
   console.log("Start menu image loaded");
   allowInput = true;
   gameLoop();
 };
+
+// Function to trigger the victory state
+function checkVictoryConditions() {
+  if (globalHealth >= 100 && trainingUnlocked && globalTraining >= 100 && !victoryAchieved) {
+    victoryAchieved = true;
+    pet.speedMultiplier = 2;
+    
+    // Stop the game loop
+    cancelAnimationFrame(gameLoop);
+
+    // Show victory overlay after a small delay
+    setTimeout(() => {
+      showVictoryOverlay(); // This will show the victory overlay
+    }, 300);
+  }
+}
+
+function showVictoryOverlay() {
+  if (document.getElementById("victoryOverlay")) return;
+
+  const overlay = document.createElement('div');
+  overlay.id = "victoryOverlay";
+  overlay.style.position = "fixed";
+  overlay.style.top = 0;
+  overlay.style.left = 0;
+  overlay.style.width = "100vw";
+  overlay.style.height = "100vh";
+  overlay.style.backgroundColor = "rgba(0, 0, 0, 0.85)";
+  overlay.style.display = "flex";
+  overlay.style.flexDirection = "column";
+  overlay.style.alignItems = "center";
+  overlay.style.justifyContent = "center";
+  overlay.style.zIndex = 10000;
+  overlay.style.color = "white";
+  overlay.style.textAlign = "center";
+
+  // Add the prize image
+  const prizeImg = document.createElement('img');
+  prizeImg.src = "assets/prize.gif"; // Update path if needed
+  prizeImg.alt = "Victory Prize";
+  prizeImg.style.width = "300px";
+  prizeImg.style.height = "auto";
+  prizeImg.style.marginBottom = "20px";
+
+  const message = document.createElement('div');
+  message.innerHTML = "🏆 Victory! You fully trained your companion!";
+  message.style.fontSize = "2.5rem";
+  message.style.marginBottom = "20px";
+
+  const mintBtn = document.createElement('button');
+  mintBtn.textContent = "Mint Your Trophy";
+  mintBtn.style.padding = "12px 24px";
+  mintBtn.style.fontSize = "1.5rem";
+  mintBtn.style.cursor = "pointer";
+  mintBtn.style.marginBottom = "15px";
+  mintBtn.style.borderRadius = "10px";
+  mintBtn.style.border = "none";
+  mintBtn.style.backgroundColor = "#4CAF50";
+  mintBtn.style.color = "white";
+
+  mintBtn.addEventListener("click", async () => {
+    try {
+      mintBtn.disabled = true;
+      mintBtn.textContent = "Minting...";
+      await mintPrize();
+      mintBtn.textContent = "Minted! 🎉";
+    } catch (error) {
+      console.error("Minting failed:", error);
+      mintBtn.textContent = "Mint Failed 😢";
+      mintBtn.disabled = false;
+    }
+  });
+
+  const restartBtn = document.createElement('button');
+  restartBtn.textContent = "Restart Game";
+  restartBtn.style.padding = "10px 20px";
+  restartBtn.style.fontSize = "1.25rem";
+  restartBtn.style.cursor = "pointer";
+  restartBtn.style.borderRadius = "10px";
+  restartBtn.style.border = "none";
+  restartBtn.style.backgroundColor = "#f44336";
+  restartBtn.style.color = "#fff";
+
+  restartBtn.addEventListener("click", () => {
+    window.location.reload();
+  });
+
+  // Add elements to overlay
+  overlay.appendChild(prizeImg);
+  overlay.appendChild(message);
+  overlay.appendChild(mintBtn);
+  overlay.appendChild(restartBtn);
+  document.body.appendChild(overlay);
+}
