@@ -6,7 +6,6 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <title>CyberPets AI</title>
   <link rel="icon" href="data:;base64,iVBORw0KGgo=">
-
   <style>
     * {
       margin: 0;
@@ -127,7 +126,6 @@
       display: none;
     }
 
-    /* Overlay for iframe-safe victory */
     #messageOverlay {
       position: absolute;
       top: 40%;
@@ -136,7 +134,7 @@
       color: white;
       font-family: sans-serif;
       font-size: 1.2rem;
-      background: rgba(0,0,0,0.8);
+      background: rgba(0, 0, 0, 0.8);
       padding: 20px;
       border-radius: 12px;
       display: none;
@@ -158,6 +156,7 @@
 <body>
   <canvas id="gameCanvas"></canvas>
 
+  <!-- UI Buttons -->
   <div id="ui">
     <div class="btn-group">
       <button class="btn" id="btnTrain" tabindex="1">🔌 Train</button>
@@ -180,27 +179,24 @@
     </div>
   </div>
 
+  <!-- Critical Health Warning -->
   <div id="criticalWarning">⚠️ Critical Health!</div>
 
+  <!-- Global Health Bar -->
   <div id="globalHealthContainer">
     <div id="globalHealthBar"></div>
   </div>
 
-  <!-- Victory Overlay -->
+  <!-- Victory Message Overlay -->
   <div id="messageOverlay">
-    <div id="messageText"></div>
-    <button id="mintBtn" onclick="openMint()">MINT TROPHY</button>
+    <div id="messageText">🎉 Your CyberPetAi Has Been Trained! 🐾</div>
+    <button id="mintBtn" onclick="mintPrize()">MINT TROPHY</button>
   </div>
 
   <script type="module">
     import './game.js';
     import { mintPrize } from './walletconnect.js';
-
-    // For OpenSea-safe mint redirect
-    window.openMint = function () {
-      // Or call mintPrize() directly if you want to trigger walletconnect
-      window.open("https://yourmintsite.com", "_blank");
-    };
+    window.mintPrize = mintPrize;
   </script>
 </body>
 </html>
