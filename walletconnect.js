@@ -1,5 +1,3 @@
-// walletconnect.js
-
 const projectId = "15da3c431a74b29edb63198a503d45b5";
 
 const metadata = {
@@ -25,7 +23,7 @@ const web3Modal = new window.Web3Modal.default({
   metadata
 });
 
-window.connectWallet = async function () {
+export async function connectWallet() {
   try {
     const provider = await web3Modal.connect();
     const web3Provider = new window.ethers.providers.Web3Provider(provider);
@@ -38,10 +36,10 @@ window.connectWallet = async function () {
     alert("❌ Failed to connect wallet: " + (err.message || err));
     return null;
   }
-};
+}
 
-window.mintPrizeNFT = async function () {
-  const wallet = await window.connectWallet();
+export async function mintPrizeNFT() {
+  const wallet = await connectWallet();
   if (!wallet) return;
 
   try {
@@ -66,18 +64,4 @@ window.mintPrizeNFT = async function () {
     console.error("❌ Minting failed:", err);
     alert("❌ Minting failed: " + (err.reason || err.message || err));
   }
-};
-
-// Optional: Enable connect button after DOM is ready
-document.addEventListener("DOMContentLoaded", () => {
-  const connectBtn = document.getElementById("btnConnect");
-  if (connectBtn) {
-    connectBtn.disabled = false;
-    connectBtn.addEventListener("click", async () => {
-      const wallet = await window.connectWallet();
-      if (wallet) {
-        alert("✅ Wallet connected: " + wallet.address);
-      }
-    });
-  }
-});
+}
