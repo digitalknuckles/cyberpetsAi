@@ -3,8 +3,8 @@
 const projectId = "15da3c431a74b29edb63198a503d45b5";
 
 const metadata = {
-  name: "FunFart Grab",
-  description: "Mint NFTs after winning the game!",
+  name: "CyberPetsAi Trainer",
+  description: "Mint a prize NFT when your CyberPet reaches full health + training!",
   url: "https://digitalknuckles.github.io/MoveToMint/",
   icons: ["https://digitalknuckles.github.io/MoveToMint/icon.png"]
 };
@@ -67,3 +67,17 @@ window.mintPrizeNFT = async function () {
     alert("❌ Minting failed: " + (err.reason || err.message || err));
   }
 };
+
+// Optional: Enable connect button after DOM is ready
+document.addEventListener("DOMContentLoaded", () => {
+  const connectBtn = document.getElementById("btnConnect");
+  if (connectBtn) {
+    connectBtn.disabled = false;
+    connectBtn.addEventListener("click", async () => {
+      const wallet = await window.connectWallet();
+      if (wallet) {
+        alert("✅ Wallet connected: " + wallet.address);
+      }
+    });
+  }
+});
