@@ -1,4 +1,4 @@
-import { mintPrize } from './walletconnect.js';
+import { mintPrizeNFT } from './walletconnect.js';
 
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
