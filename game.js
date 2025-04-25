@@ -6,7 +6,7 @@ const ctx = canvas.getContext("2d");
 const petSprites = [
   "./RobotTeddyAi.png",
   "./RobotTeddyAi0.png",
-  "./RobotTeddyAi1.png"
+  "./RobotTeddyAi1.png",
   "./RobotTeddyAi2.png",
   "./RobotTeddyAi3.png", // You can keep duplicates for weighting
   "./RobotTeddyAi4.png",
