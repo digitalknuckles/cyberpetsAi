@@ -7,11 +7,11 @@ const petSprites = [
   "./RobotTeddyAi.png",
   "./RobotTeddyAi0.png",
   "./RobotTeddyAi1.png"
-  //"./RobotTeddyAi2.png",
- // "./RobotTeddyAi2.png", // You can keep duplicates for weighting
-  //"./RobotTeddyAi3.png",
- // "./RobotTeddyAi4.png",
-  //"./RobotTeddyAi5.png"
+  "./RobotTeddyAi2.png",
+  "./RobotTeddyAi3.png", // You can keep duplicates for weighting
+  "./RobotTeddyAi4.png",
+  "./RobotTeddyAi5.png",
+  "./RobotTeddyAi6.png"
 ];
 
 let pet = {
