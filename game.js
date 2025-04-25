@@ -1,4 +1,5 @@
 import { mintPrizeNFT } from './walletconnect.js';
+window.mintPrizeNFT = mintPrizeNFT;
 
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
@@ -567,8 +568,6 @@ function checkVictoryConditions() {
 }
 
 function showVictoryOverlay() {
-  if (document.getElementById("victoryOverlay")) return;
-
   const overlay = document.createElement('div');
   overlay.id = "victoryOverlay";
   overlay.style.position = "fixed";
@@ -576,69 +575,51 @@ function showVictoryOverlay() {
   overlay.style.left = 0;
   overlay.style.width = "100vw";
   overlay.style.height = "100vh";
-  overlay.style.backgroundColor = "rgba(0, 0, 0, 0.85)";
+  overlay.style.backgroundColor = "rgba(0, 0, 0, 0.9)";
   overlay.style.display = "flex";
   overlay.style.flexDirection = "column";
   overlay.style.alignItems = "center";
   overlay.style.justifyContent = "center";
-  overlay.style.zIndex = 10000;
-  overlay.style.color = "white";
-  overlay.style.textAlign = "center";
+  overlay.style.color = "#00ffcc";
+  overlay.style.fontSize = "2rem";
+  overlay.style.zIndex = 9999;
 
-  // Add the prize image
-  const prizeImg = document.createElement('img');
-  prizeImg.src = "./prize.gif"; // Update path if needed
-  prizeImg.alt = "Victory Prize";
-  prizeImg.style.width = "300px";
-  prizeImg.style.height = "auto";
-  prizeImg.style.marginBottom = "20px";
-
-  const message = document.createElement('div');
-  message.innerHTML = "🏆 Victory! You fully trained your companion!";
-  message.style.fontSize = "2.5rem";
-  message.style.marginBottom = "20px";
+  const msg = document.createElement('div');
+  msg.textContent = "🌟 Super Star Pet Vibes Achieved!";
+  msg.style.marginBottom = "30px";
 
   const mintBtn = document.createElement('button');
-  mintBtn.textContent = "Mint Your Trophy";
-  mintBtn.style.padding = "12px 24px";
+  mintBtn.textContent = "Mint Prize NFT";
+  mintBtn.style.padding = "10px 20px";
   mintBtn.style.fontSize = "1.5rem";
   mintBtn.style.cursor = "pointer";
-  mintBtn.style.marginBottom = "15px";
-  mintBtn.style.borderRadius = "10px";
   mintBtn.style.border = "none";
+  mintBtn.style.borderRadius = "10px";
   mintBtn.style.backgroundColor = "#4CAF50";
-  mintBtn.style.color = "white";
-
-  mintBtn.addEventListener("click", async () => {
-    try {
-      mintBtn.disabled = true;
-      mintBtn.textContent = "Minting...";
-      await mintPrize();
-      mintBtn.textContent = "Minted! 🎉";
-    } catch (error) {
-      console.error("Minting failed:", error);
-      mintBtn.textContent = "Mint Failed 😢";
-      mintBtn.disabled = false;
+  mintBtn.style.color = "#fff";
+  mintBtn.addEventListener("click", () => {
+    if (typeof window.mintPrizeNFT === 'function') {
+      window.mintPrizeNFT(); // ✅ Calls the NFT mint function from walletconnect.js
+    } else {
+      console.error("mintPrizeNFT is not defined.");
     }
   });
 
   const restartBtn = document.createElement('button');
   restartBtn.textContent = "Restart Game";
+  restartBtn.style.marginTop = "20px";
   restartBtn.style.padding = "10px 20px";
-  restartBtn.style.fontSize = "1.25rem";
+  restartBtn.style.fontSize = "1.2rem";
   restartBtn.style.cursor = "pointer";
-  restartBtn.style.borderRadius = "10px";
   restartBtn.style.border = "none";
-  restartBtn.style.backgroundColor = "#f44336";
+  restartBtn.style.borderRadius = "10px";
+  restartBtn.style.backgroundColor = "#2196F3";
   restartBtn.style.color = "#fff";
-
   restartBtn.addEventListener("click", () => {
     window.location.reload();
   });
 
-  // Add elements to overlay
-  overlay.appendChild(prizeImg);
-  overlay.appendChild(message);
+  overlay.appendChild(msg);
   overlay.appendChild(mintBtn);
   overlay.appendChild(restartBtn);
   document.body.appendChild(overlay);
