@@ -12,7 +12,8 @@ const petSprites = [
   "./RobotTeddyAi4.png",
   "./RobotTeddyAi5.png",
   "./RobotTeddyAi6.png",
-  "./RobotTeddyAi7.png"
+  "./RobotTeddyAi7.png",
+  "./RobotTeddyAi8.png"
 ];
 
 let pet = {
