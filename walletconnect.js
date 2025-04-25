@@ -1,6 +1,9 @@
 // Import ethers (only once at the top)
 import { ethers } from 'https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.esm.min.js';
 
+// Import WalletConnect provider
+import WalletConnectProvider from "https://cdn.jsdelivr.net/npm/@walletconnect/web3-provider@1.6.6/dist/umd/index.min.js";
+
 // Your contract address and ABI
 const CONTRACT_ADDRESS = '0x36b8192ef6bc601dcf380af0fa439ba8b78417cb';
 const ABI = [
@@ -19,17 +22,16 @@ let signer;
 let contract;
 
 /**
- * Connects to the user's wallet using MetaMask or other supported providers.
+ * Connects to the user's wallet using MetaMask or WalletConnect.
  * Checks if the wallet is already connected, and requests account access if not.
  */
 export async function connectWallet() {
   if (window.ethereum) {
+    // MetaMask is installed, use it
     try {
-      // Check if the wallet is already connected
       const accounts = await window.ethereum.request({ method: 'eth_accounts' });
 
       if (accounts.length === 0) {
-        // Request wallet connection if not already connected
         await window.ethereum.request({ method: 'eth_requestAccounts' });
       }
 
@@ -38,15 +40,31 @@ export async function connectWallet() {
       signer = provider.getSigner();
       contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
 
-      console.log('✅ Wallet connected successfully!');
+      console.log('✅ MetaMask wallet connected successfully!');
       return signer;
     } catch (error) {
-      console.error('❌ Failed to connect wallet:', error);
-      throw new Error('Connection to wallet failed');
+      console.error('❌ Failed to connect MetaMask wallet:', error);
+      throw new Error('MetaMask connection failed');
     }
   } else {
-    alert('Please install MetaMask or a compatible wallet.');
-    throw new Error('No wallet found');
+    // MetaMask is not installed, fallback to WalletConnect
+    try {
+      const walletConnectProvider = new WalletConnectProvider({
+        infuraId: "YOUR_INFURA_PROJECT_ID", // Replace with your Infura project ID
+      });
+
+      await walletConnectProvider.enable();  // Request connection to the wallet
+
+      provider = new ethers.providers.Web3Provider(walletConnectProvider);
+      signer = provider.getSigner();
+      contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
+
+      console.log('✅ WalletConnect wallet connected successfully!');
+      return signer;
+    } catch (error) {
+      console.error('❌ Failed to connect WalletConnect wallet:', error);
+      throw new Error('WalletConnect connection failed');
+    }
   }
 }
 
@@ -69,19 +87,23 @@ export async function mintPrize() {
     throw new Error('Minting failed');
   }
 }
+
+// Event listener for minting on victory
 window.addEventListener("message", (event) => {
   const { action, message } = event.data;
 
   if (action === "victory-achieved") {
     alert(message);
-    // Here you can trigger wallet connection/minting in the parent scope
-    connectWallet().then(() => {
-      return mintPrize();
-    }).then(() => {
-      alert("🏆 NFT Minted Successfully!");
-    }).catch((err) => {
-      console.error("Minting error:", err);
-      alert("Error minting NFT.");
-    });
+    connectWallet()
+      .then(() => {
+        return mintPrize();
+      })
+      .then(() => {
+        alert("🏆 NFT Minted Successfully!");
+      })
+      .catch((err) => {
+        console.error("Minting error:", err);
+        alert("Error minting NFT.");
+      });
   }
 });
