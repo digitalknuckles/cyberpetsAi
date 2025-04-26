@@ -1,5 +1,7 @@
-0import { connectWallet, mintPrizeNFT } from './walletconnect.js';
-window.mintPrizeNFT = mintPrizeNFT;
+// commmented out wallet connect import due to conflicting iframe sandboxing  
+
+//0import { connectWallet, mintPrizeNFT } from './walletconnect.js';
+//window.mintPrizeNFT = mintPrizeNFT;
 
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
@@ -598,11 +600,15 @@ function showVictoryOverlay() {
   mintBtn.style.backgroundColor = "#4CAF50";
   mintBtn.style.color = "#fff";
   mintBtn.addEventListener("click", () => {
-    if (typeof window.mintPrizeNFT === 'function') {
-      window.mintPrizeNFT(); // ✅ Calls the NFT mint function from walletconnect.js
-    } else {
-      console.error("mintPrizeNFT is not defined.");
-    }
+    // Disabled minting function due to sandbox limitations
+        console.log("Minting disabled in sandbox mode.");
+        alert("Minting is disabled in this environment.");
+        // original call commented out:
+    //if (typeof window.mintPrizeNFT === 'function') {
+      //window.mintPrizeNFT(); // ✅ Calls the NFT mint function from walletconnect.js
+    //} else {
+      //console.error("mintPrizeNFT is not defined.");
+    //}
   });
 
   const restartBtn = document.createElement('button');
