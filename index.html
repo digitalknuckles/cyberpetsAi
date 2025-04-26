@@ -762,6 +762,8 @@ function checkVictoryConditions() {
 }
 
 function showVictoryOverlay() {
+  if (document.getElementById("victoryOverlay")) return;
+
   const overlay = document.createElement('div');
   overlay.id = "victoryOverlay";
   overlay.style.position = "fixed";
@@ -769,28 +771,38 @@ function showVictoryOverlay() {
   overlay.style.left = 0;
   overlay.style.width = "100vw";
   overlay.style.height = "100vh";
-  overlay.style.backgroundColor = "rgba(0, 0, 0, 0.9)";
+  overlay.style.backgroundColor = "rgba(0, 0, 0, 0.85)";
   overlay.style.display = "flex";
   overlay.style.flexDirection = "column";
   overlay.style.alignItems = "center";
   overlay.style.justifyContent = "center";
-  overlay.style.color = "#00ffcc";
-  overlay.style.fontSize = "2rem";
-  overlay.style.zIndex = 9999;
+  overlay.style.zIndex = 10000;
+  overlay.style.color = "white";
+  overlay.style.textAlign = "center";
+
+    // Add the prize image
+  const prizeImg = document.createElement('img');
+  prizeImg.src = "./prize.gif"; // Update path if needed
+  prizeImg.alt = "Victory Prize";
+  prizeImg.style.width = "300px";
+  prizeImg.style.height = "auto";
+  prizeImg.style.marginBottom = "20px";
 
   const msg = document.createElement('div');
-  msg.textContent = "💬 CyberPetAi is fully Trained! 🎁";
-  msg.style.marginBottom = "30px";
+  msg.innerHTML = "🏆 Victory! You fully trained your companion!";
+  msg.style.fontSize = "2.5rem";
+  msg.style.marginBottom = "20px";
 
   const mintBtn = document.createElement('button');
-  mintBtn.textContent = "Mint Prize NFT";
-  mintBtn.style.padding = "10px 20px";
+  mintBtn.textContent = "Mint Your Trophy";
+  mintBtn.style.padding = "12px 24px";
   mintBtn.style.fontSize = "1.5rem";
   mintBtn.style.cursor = "pointer";
-  mintBtn.style.border = "none";
+  mintBtn.style.marginBottom = "15px";
   mintBtn.style.borderRadius = "10px";
+  mintBtn.style.border = "none";
   mintBtn.style.backgroundColor = "#4CAF50";
-  mintBtn.style.color = "#fff";
+  mintBtn.style.color = "white";
   mintBtn.addEventListener("click", showMintDisabledMessage);
     // Disabled minting function due to sandbox limitations
         console.log("Minting disabled in sandbox mode.");
@@ -833,7 +845,7 @@ function showVictoryOverlay() {
   restartBtn.addEventListener("click", () => {
     window.location.reload();
   });
-
+  overlay.appendChild(prizeImg);
   overlay.appendChild(msg);
   overlay.appendChild(mintBtn);
   overlay.appendChild(restartBtn);
