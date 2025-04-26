@@ -621,7 +621,7 @@ function showVictoryOverlay() {
   setTimeout(() => {
     msg.remove();
   }, 3000);
-});
+}
         // original call commented out:
     //if (typeof window.mintPrizeNFT === 'function') {
       //window.mintPrizeNFT(); // ✅ Calls the NFT mint function from walletconnect.js
