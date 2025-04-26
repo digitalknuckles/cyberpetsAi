@@ -628,7 +628,7 @@ function showVictoryOverlay() {
     //} else {
       //console.error("mintPrizeNFT is not defined.");
     //}
-  });
+  //});
 
   const restartBtn = document.createElement('button');
   restartBtn.textContent = "Restart Game";
