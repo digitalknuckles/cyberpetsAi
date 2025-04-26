@@ -162,6 +162,9 @@ function startGame() {
   }
 }
 
+document.addEventListener("keydown", (e) => { if (e.key === "Enter") startGame(); });
+document.addEventListener("click", () => { startGame(); });
+document.addEventListener("touchstart", () => { startGame(); });
 
 function resizeCanvas() {
   const parent = canvas.parentElement;
