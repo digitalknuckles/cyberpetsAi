@@ -240,10 +240,11 @@ function drawHUD() {
     }
   });
 
+  
   const hpBar = document.getElementById("globalHealthBar");
   if (hpBar) hpBar.style.width = `${globalHealth}%`;
 
-  const trainingBar = document.getElementById("globalTrainingBar");
+  const trainingBar = document.getElementById("trainingProgressBar");
   if (trainingBar) trainingBar.style.width = `${globalTraining}%`;
 
   const critical = document.getElementById("criticalWarning");
