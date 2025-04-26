@@ -601,10 +601,27 @@ function showVictoryOverlay() {
   mintBtn.style.borderRadius = "10px";
   mintBtn.style.backgroundColor = "#4CAF50";
   mintBtn.style.color = "#fff";
-  mintBtn.addEventListener("click", () => {
+  mintBtn.addEventListener("click", showMintDisabledMessage);
     // Disabled minting function due to sandbox limitations
         console.log("Minting disabled in sandbox mode.");
-        alert("Minting is disabled in this environment.");
+        function showMintDisabledMessage() {
+  const msg = document.createElement('div');
+  msg.textContent = "Minting is disabled in this environment.";
+  msg.style.position = "fixed";
+  msg.style.top = "20%";
+  msg.style.left = "50%";
+  msg.style.transform = "translateX(-50%)";
+  msg.style.background = "rgba(0,0,0,0.8)";
+  msg.style.color = "white";
+  msg.style.padding = "15px 25px";
+  msg.style.borderRadius = "10px";
+  msg.style.zIndex = "10000";
+  document.body.appendChild(msg);
+
+  setTimeout(() => {
+    msg.remove();
+  }, 3000);
+}
         // original call commented out:
     //if (typeof window.mintPrizeNFT === 'function') {
       //window.mintPrizeNFT(); // ✅ Calls the NFT mint function from walletconnect.js
