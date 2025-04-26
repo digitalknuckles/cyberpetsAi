@@ -127,13 +127,11 @@ let showStartMenu = true;
 const startMenuImage = new Image();
 startMenuImage.src = "./startMenu.png";
 
-let gameStarted = false;
 let allowInput = false;
+setTimeout(() => { allowInput = true; }, 500);
 
-let allowKeyPress = false;
-setTimeout(() => {
-  allowKeyPress = true;
-}, 500);
+let blinkTimer = 0;
+let showBlinkText = true;
 
 function drawStartMenu() {
   if (startMenuImage.complete && startMenuImage.naturalWidth > 0) {
@@ -142,28 +140,28 @@ function drawStartMenu() {
     ctx.fillStyle = "black";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
   }
+
+  // Blinking "Press Enter to Start" Text
+  blinkTimer++;
+  if (blinkTimer > 30) { // About 0.5 seconds if 60fps
+    showBlinkText = !showBlinkText;
+    blinkTimer = 0;
+  }
+
+  if (showBlinkText) {
+    ctx.font = "32px Arial";
+    ctx.fillStyle = "white";
+    ctx.textAlign = "center";
+    ctx.fillText("Press Enter to Start", canvas.width / 2, canvas.height * 0.8);
+  }
 }
 
-// Keyboard support
-document.addEventListener("keydown", (e) => {
-  if (e.key === "Enter" && showStartMenu && allowInput) {
+function startGame() {
+  if (allowInput && showStartMenu) {
     showStartMenu = false;
   }
-});
+}
 
-// Touch support
-document.addEventListener("touchstart", (e) => {
-  if (showStartMenu && allowInput) {
-    showStartMenu = false;
-  }
-});
-
-// Mouse click support
-document.addEventListener("click", (e) => {
-  if (showStartMenu && allowInput) {
-    showStartMenu = false;
-  }
-});
 
 function resizeCanvas() {
   const parent = canvas.parentElement;
@@ -496,8 +494,8 @@ function gameLoop() {
 
   if (showStartMenu) {
     drawStartMenu();
-  } else {
-    drawScene(); // Your function to render gameplay
+    requestAnimationFrame(gameLoop);
+    return;
   }
 
   drawBackground(); 
@@ -551,7 +549,7 @@ function updatePetRoaming() {
 startMenuImage.onload = () => {
   console.log("Start menu image loaded");
   allowInput = true;
-  gameLoop();
+  requestAnimationFrame(gameLoop);
 };
 
 // Function to trigger the victory state
