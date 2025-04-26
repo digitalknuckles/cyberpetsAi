@@ -1,4 +1,4 @@
-import { connectWallet, mintPrizeNFT } from './walletconnect.js';
+0import { connectWallet, mintPrizeNFT } from './walletconnect.js';
 window.mintPrizeNFT = mintPrizeNFT;
 
 const canvas = document.getElementById("gameCanvas");
@@ -585,7 +585,7 @@ function showVictoryOverlay() {
   overlay.style.zIndex = 9999;
 
   const msg = document.createElement('div');
-  msg.textContent = "🌟 Super Star Pet Vibes Achieved!";
+  msg.textContent = "💬 CyberPetAi is fully Trained! 🎁";
   msg.style.marginBottom = "30px";
 
   const mintBtn = document.createElement('button');
