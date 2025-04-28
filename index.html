@@ -174,32 +174,98 @@
 
   <div id="criticalWarning">⚠️ Critical Health!</div>
 
-  <script>
-const killCommandBtn = document.getElementById('btnConnect');
+ <div id="customConfirm" class="popup-overlay hidden">
+  <div class="popup-content">
+    <p>⚡ Are you sure you want to execute the Kill Command? ⚡</p>
+    <div class="popup-buttons">
+      <button id="confirmYes">YES</button>
+      <button id="confirmNo">NO</button>
+    </div>
+  </div>
+</div>
 
-function handleKillCommand() {
-  const userConfirmed = confirm("⚠️ Initiate Kill Command?\nAll progress will be lost! Proceed?");
-  
-  if (userConfirmed) {
-    // Restart the page or restart game scene
-    location.reload();
-    
-    // OR, if using Phaser.js:
-    // game.scene.restart();
-
-    // OR, completely destroy game:
-    // game.destroy(true);
-  } else {
-    console.log("Kill Command aborted by user.");
-  }
+<!-- Styles for Popup -->
+<style>
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
 }
 
-// Handle both click and touch
-killCommandBtn.addEventListener('click', handleKillCommand);
+.popup-content {
+  background: #222;
+  color: white;
+  padding: 20px;
+  border-radius: 15px;
+  text-align: center;
+  width: 80%;
+  max-width: 300px;
+}
+
+.popup-buttons {
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-around;
+}
+
+.popup-buttons button {
+  background: #ff0044;
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.popup-buttons button:hover {
+  background: #cc0033;
+}
+
+.hidden {
+  display: none;
+}
+</style>
+
+<!-- JavaScript -->
+<script>
+const killCommandBtn = document.getElementById('btnConnect');
+const customConfirm = document.getElementById('customConfirm');
+const confirmYes = document.getElementById('confirmYes');
+const confirmNo = document.getElementById('confirmNo');
+
+// Open custom popup on button click/touch
+killCommandBtn.addEventListener('click', showCustomConfirm);
 killCommandBtn.addEventListener('touchstart', (e) => {
-  e.preventDefault(); // prevent duplicate events
-  handleKillCommand();
+  e.preventDefault();
+  showCustomConfirm();
 }, { passive: false });
+
+function showCustomConfirm() {
+  customConfirm.classList.remove('hidden');
+}
+
+// Handle YES and NO buttons
+confirmYes.addEventListener('click', () => {
+  customConfirm.classList.add('hidden');
+  // Restart game or page
+  location.reload();
+
+  // OR if Phaser.js:
+  // game.scene.restart();
+});
+
+confirmNo.addEventListener('click', () => {
+  customConfirm.classList.add('hidden');
+});
 </script>
 <!-- Ethers.js -->
 <!--<script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.min.js"></script> -->
