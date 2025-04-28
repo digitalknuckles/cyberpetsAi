@@ -243,11 +243,8 @@ const confirmYes = document.getElementById('confirmYes');
 const confirmNo = document.getElementById('confirmNo');
 
 // Open custom popup on button click/touch
-killCommandBtn.addEventListener('click', showCustomConfirm);
-killCommandBtn.addEventListener('touchstart', (e) => {
-  e.preventDefault();
-  showCustomConfirm();
-}, { passive: false });
+// Open custom popup on any pointer interaction (click/touch/pen)
+killCommandBtn.addEventListener('pointerdown', showCustomConfirm);
 
 function showCustomConfirm() {
   customConfirm.classList.remove('hidden');
