@@ -220,20 +220,20 @@ let pet = {
   image: new Image(),
   stats: {
     train: 100,
-    sleep: 100,
-    wash: 100,
+    charge: 100,
+    clean: 100,
     play: 100
   },
   timers: {
     train: 10,
-    sleep: 10,
-    wash: 10,
+    charge: 10,
+    clean: 10,
     play: 10
   },
   zeroTimers: {
     train: null,
-    sleep: null,
-    wash: null,
+    charge: null,
+    clean: null,
     play: null
   },
   isRoaming: true,
@@ -255,8 +255,8 @@ let trainingUnlocked = false;
 
 let statCooldowns = {
   train: 0,
-  sleep: 0,
-  wash: 0,
+  charge: 0,
+  clean: 0,
   play: 0
 };
 
@@ -298,7 +298,7 @@ function drawScene() {
 
 // Attach stat button listeners once DOM is ready
 window.addEventListener("DOMContentLoaded", () => {
-  const stats = ["train", "sleep", "wash", "play"];
+  const stats = ["train", "charge", "clean", "play"];
 
   stats.forEach(stat => {
     const btn = document.getElementById(`btn${capitalize(stat)}`);
